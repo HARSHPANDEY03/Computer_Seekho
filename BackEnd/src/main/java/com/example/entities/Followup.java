@@ -1,42 +1,96 @@
 package com.example.entities;
 
-import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDate;	
+	
+import com.example.entities.Enquiry;
+import com.example.entities.Staff;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "followup")
 public class Followup {
 
+    /*
+     * followup_id
+     * INT, Primary Key, Auto Increment
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "followup_id")
+    @Column(name = "followup_id", nullable = false)
     private Integer followupId;
 
-    @Column(name = "enquiry_id")
-    private Integer enquiryId;
+    /*
+     * enquiry_id
+     * Many follow-ups can belong to one enquiry.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "enquiry_id")
+    @JsonIgnoreProperties({
+        "followups",
+        "student",
+        "hibernateLazyInitializer",
+        "handler"
+    })
+    private Enquiry enquiry;
 
-    @Column(name = "staff_id")
-    private Integer staffId;
+    /*
+     * staff_id
+     * One staff member can handle multiple follow-ups.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "staff_id")
+    @JsonIgnoreProperties({
+        "followups",
+        "enquiries",
+        "hibernateLazyInitializer",
+        "handler"
+    })
+    private Staff staff;
 
+    /*
+     * followup_date
+     * MySQL DATE maps to Java LocalDate.
+     */
     @Column(name = "followup_date")
     private LocalDate followupDate;
 
+    /*
+     * followup_msg
+     * Maximum length: 500 characters.
+     */
     @Column(name = "followup_msg", length = 500)
     private String followupMsg;
 
+    /*
+     * is_active
+     * Default value is true.
+     */
     @Column(name = "is_active")
     private Boolean isActive = true;
 
-    // Default Constructor
+    // Required by JPA
     public Followup() {
     }
 
-    // Parameterized Constructor
-    public Followup(Integer followupId, Integer enquiryId, Integer staffId,
-                    LocalDate followupDate, String followupMsg, Boolean isActive) {
-        this.followupId = followupId;
-        this.enquiryId = enquiryId;
-        this.staffId = staffId;
+    public Followup(
+            Enquiry enquiry,
+            Staff staff,
+            LocalDate followupDate,
+            String followupMsg,
+            Boolean isActive) {
+
+        this.enquiry = enquiry;
+        this.staff = staff;
         this.followupDate = followupDate;
         this.followupMsg = followupMsg;
         this.isActive = isActive;
@@ -50,20 +104,20 @@ public class Followup {
         this.followupId = followupId;
     }
 
-    public Integer getEnquiryId() {
-        return enquiryId;
+    public Enquiry getEnquiry() {
+        return enquiry;
     }
 
-    public void setEnquiryId(Integer enquiryId) {
-        this.enquiryId = enquiryId;
+    public void setEnquiry(Enquiry enquiry) {
+        this.enquiry = enquiry;
     }
 
-    public Integer getStaffId() {
-        return staffId;
+    public Staff getStaff() {
+        return staff;
     }
 
-    public void setStaffId(Integer staffId) {
-        this.staffId = staffId;
+    public void setStaff(Staff staff) {
+        this.staff = staff;
     }
 
     public LocalDate getFollowupDate() {
@@ -94,8 +148,6 @@ public class Followup {
     public String toString() {
         return "Followup{" +
                 "followupId=" + followupId +
-                ", enquiryId=" + enquiryId +
-                ", staffId=" + staffId +
                 ", followupDate=" + followupDate +
                 ", followupMsg='" + followupMsg + '\'' +
                 ", isActive=" + isActive +
