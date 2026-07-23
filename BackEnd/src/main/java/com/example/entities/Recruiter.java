@@ -1,47 +1,41 @@
 package com.example.entities;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "recruiters")
+@Table(name = "recruiter")
 public class Recruiter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "recruiter_id")
+    @Column(name = "recruiter_id", nullable = false)
     private Integer recruiterId;
 
-    @Column(name = "company_name", nullable = false)
-    private String companyName;
+    @Column(name = "photo_url", length = 255)
+    private String photoUrl;
 
-    @Column(name = "hr_name", nullable = false)
-    private String hrName;
+    @Column(name = "recruiter_name", length = 100)
+    private String recruiterName;
 
-    @Column(name = "email")
-    private String email;
-
-    @Column(name = "mobile")
-    private String mobile;
-
-    @Column(name = "designation")
-    private String designation;
-
-    @Column(name = "address")
-    private String address;
+    @Column(name = "description", length = 500)
+    private String description;
 
     public Recruiter() {
     }
 
-    public Recruiter(Integer recruiterId, String companyName, String hrName,
-                     String email, String mobile, String designation,
-                     String address) {
-        this.recruiterId = recruiterId;
-        this.companyName = companyName;
-        this.hrName = hrName;
-        this.email = email;
-        this.mobile = mobile;
-        this.designation = designation;
-        this.address = address;
+    public Recruiter(
+            String photoUrl,
+            String recruiterName,
+            String description) {
+
+        this.photoUrl = photoUrl;
+        this.recruiterName = recruiterName;
+        this.description = description;
     }
 
     public Integer getRecruiterId() {
@@ -52,51 +46,37 @@ public class Recruiter {
         this.recruiterId = recruiterId;
     }
 
-    public String getCompanyName() {
-        return companyName;
+    public String getPhotoUrl() {
+        return photoUrl;
     }
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 
-    public String getHrName() {
-        return hrName;
+    public String getRecruiterName() {
+        return recruiterName;
     }
 
-    public void setHrName(String hrName) {
-        this.hrName = hrName;
+    public void setRecruiterName(String recruiterName) {
+        this.recruiterName = recruiterName;
     }
 
-    public String getEmail() {
-        return email;
+    public String getDescription() {
+        return description;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getMobile() {
-        return mobile;
-    }
-
-    public void setMobile(String mobile) {
-        this.mobile = mobile;
-    }
-
-    public String getDesignation() {
-        return designation;
-    }
-
-    public void setDesignation(String designation) {
-        this.designation = designation;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
+    @Override
+    public String toString() {
+        return "Recruiter{" +
+                "recruiterId=" + recruiterId +
+                ", photoUrl='" + photoUrl + '\'' +
+                ", recruiterName='" + recruiterName + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 }

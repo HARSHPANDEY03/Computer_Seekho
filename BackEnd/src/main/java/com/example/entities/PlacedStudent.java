@@ -1,8 +1,18 @@
 package com.example.entities;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "placed_student")
@@ -10,50 +20,60 @@ public class PlacedStudent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "placed_student_id")
+    @Column(name = "placed_student_id", nullable = false)
     private Integer placedStudentId;
 
-    @ManyToOne
-    @JoinColumn(name = "student_id", nullable = false)
-    private Student student;
+    @Column(name = "placed_student_name", length = 100)
+    private String placedStudentName;
 
-    @ManyToOne
-    @JoinColumn(name = "recruiter_id", nullable = false)
+    @Column(
+        name = "placement_package",
+        precision = 10,
+        scale = 2
+    )
+    private BigDecimal placementPackage;
+
+    /*
+     * Many placed students can be associated
+     * with the same recruiter.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recruiter_id")
+    @JsonIgnoreProperties({
+        "placedStudents",
+        "hibernateLazyInitializer",
+        "handler"
+    })
     private Recruiter recruiter;
 
-    @Column(name = "company_name")
-    private String companyName;
-
-    @Column(name = "job_role")
-    private String jobRole;
-
-    @Column(name = "package_amount")
-    private Double packageAmount;
-
-    @Column(name = "placement_date")
-    private LocalDate placementDate;
-
-    @Column(name = "location")
-    private String location;
-
-    @Column(name = "remarks")
-    private String remarks;
+    /*
+     * Many placed students can belong
+     * to the same batch.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "batch_id")
+    @JsonIgnoreProperties({
+        "placedStudents",
+        "students",
+        "course",
+        "hibernateLazyInitializer",
+        "handler"
+    })
+    private Batch batch;
 
     public PlacedStudent() {
     }
 
-    public PlacedStudent(Integer placedStudentId, Student student, Recruiter recruiter,
-                         String companyName, String jobRole, Double packageAmount,
-                         LocalDate placementDate, String location, String remarks) {
-        this.placedStudentId = placedStudentId;
-        this.student = student;
+    public PlacedStudent(
+            String placedStudentName,
+            BigDecimal placementPackage,
+            Recruiter recruiter,
+            Batch batch) {
+
+        this.placedStudentName = placedStudentName;
+        this.placementPackage = placementPackage;
         this.recruiter = recruiter;
-        this.companyName = companyName;
-        this.jobRole = jobRole;
-        this.packageAmount = packageAmount;
-        this.placementDate = placementDate;
-        this.location = location;
-        this.remarks = remarks;
+        this.batch = batch;
     }
 
     public Integer getPlacedStudentId() {
@@ -64,12 +84,20 @@ public class PlacedStudent {
         this.placedStudentId = placedStudentId;
     }
 
-    public Student getStudent() {
-        return student;
+    public String getPlacedStudentName() {
+        return placedStudentName;
     }
 
-    public void setStudent(Student student) {
-        this.student = student;
+    public void setPlacedStudentName(String placedStudentName) {
+        this.placedStudentName = placedStudentName;
+    }
+
+    public BigDecimal getPlacementPackage() {
+        return placementPackage;
+    }
+
+    public void setPlacementPackage(BigDecimal placementPackage) {
+        this.placementPackage = placementPackage;
     }
 
     public Recruiter getRecruiter() {
@@ -80,64 +108,20 @@ public class PlacedStudent {
         this.recruiter = recruiter;
     }
 
-    public String getCompanyName() {
-        return companyName;
+    public Batch getBatch() {
+        return batch;
     }
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
-
-    public String getJobRole() {
-        return jobRole;
-    }
-
-    public void setJobRole(String jobRole) {
-        this.jobRole = jobRole;
-    }
-
-    public Double getPackageAmount() {
-        return packageAmount;
-    }
-
-    public void setPackageAmount(Double packageAmount) {
-        this.packageAmount = packageAmount;
-    }
-
-    public LocalDate getPlacementDate() {
-        return placementDate;
-    }
-
-    public void setPlacementDate(LocalDate placementDate) {
-        this.placementDate = placementDate;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
+    public void setBatch(Batch batch) {
+        this.batch = batch;
     }
 
     @Override
     public String toString() {
-        return "PlacedStudent [placedStudentId=" + placedStudentId +
-                ", student=" + student +
-                ", recruiter=" + recruiter +
-                ", companyName=" + companyName +
-                ", jobRole=" + jobRole +
-                ", packageAmount=" + packageAmount +
-                ", placementDate=" + placementDate +
-                ", location=" + location +
-                ", remarks=" + remarks + "]";
+        return "PlacedStudent{" +
+                "placedStudentId=" + placedStudentId +
+                ", placedStudentName='" + placedStudentName + '\'' +
+                ", placementPackage=" + placementPackage +
+                '}';
     }
 }
