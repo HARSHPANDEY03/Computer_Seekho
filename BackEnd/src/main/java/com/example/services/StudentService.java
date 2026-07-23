@@ -11,8 +11,6 @@ public interface StudentService {
 
     List<StudentResponse> getAllStudents();
     
-    List<StudentResponse> getAllStudents();
-
     StudentResponse getStudentById(Integer studentId);
 
     StudentResponse getStudentByEnquiryId(Integer enquiryId);
