@@ -13,7 +13,7 @@ public interface StudentService {
     StudentResponse registerStudent(StudentRequest request);
 
     List<StudentResponse> getAllStudents();
-
+    
     StudentResponse getStudentById(Integer studentId);
 
     StudentResponse getStudentByEnquiryId(Integer enquiryId);
