@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.entities.Album;
+import com.example.dto.AlbumRequest;
+import com.example.dto.AlbumResponse;
 import com.example.services.AlbumService;
 
 @RestController
@@ -22,31 +23,27 @@ public class AlbumController {
     @Autowired
     private AlbumService albumService;
 
-    // Get all albums
     @GetMapping
-    public List<Album> getAllAlbums() {
+    public List<AlbumResponse> getAllAlbums() {
         return albumService.getAllAlbums();
     }
 
-    // Get album by ID
     @GetMapping("/{id}")
-    public Album getAlbumById(@PathVariable int id) {
+    public AlbumResponse getAlbumById(@PathVariable int id) {
         return albumService.getAlbumById(id);
     }
 
-    // Save a new album
     @PostMapping
-    public Album saveAlbum(@RequestBody Album album) {
-        return albumService.saveAlbum(album);
+    public AlbumResponse saveAlbum(@RequestBody AlbumRequest albumRequest) {
+        return albumService.saveAlbum(albumRequest);
     }
 
-    // Update an existing album
     @PutMapping("/{id}")
-    public Album updateAlbum(@PathVariable int id, @RequestBody Album album) {
-        return albumService.updateAlbum(id, album);
+    public AlbumResponse updateAlbum(@PathVariable int id,
+                                     @RequestBody AlbumRequest albumRequest) {
+        return albumService.updateAlbum(id, albumRequest);
     }
 
-    // Delete an album
     @DeleteMapping("/{id}")
     public String deleteAlbum(@PathVariable int id) {
         albumService.deleteAlbum(id);

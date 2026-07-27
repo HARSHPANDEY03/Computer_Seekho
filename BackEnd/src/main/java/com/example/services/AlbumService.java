@@ -2,17 +2,18 @@ package com.example.services;
 
 import java.util.List;
 
-import com.example.entities.Album;
+import com.example.dto.AlbumRequest;
+import com.example.dto.AlbumResponse;
 
 public interface AlbumService {
 
-    List<Album> getAllAlbums();
+    List<AlbumResponse> getAllAlbums();
 
-    Album getAlbumById(int albumId);
+    AlbumResponse getAlbumById(int albumId);
 
-    Album saveAlbum(Album album);
+    AlbumResponse saveAlbum(AlbumRequest albumRequest);
 
-    Album updateAlbum(int albumId, Album album);
+    AlbumResponse updateAlbum(int albumId, AlbumRequest albumRequest);
 
     void deleteAlbum(int albumId);
 }

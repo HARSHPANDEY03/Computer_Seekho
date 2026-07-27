@@ -2,17 +2,18 @@ package com.example.services;
 
 import java.util.List;
 
-import com.example.entities.Image;
+import com.example.dto.ImageRequest;
+import com.example.dto.ImageResponse;
 
 public interface ImageService {
 
-    List<Image> getAllImages();
+    List<ImageResponse> getAllImages();
 
-    Image getImageById(int imageId);
+    ImageResponse getImageById(int imageId);
 
-    Image saveImage(Image image);
+    ImageResponse saveImage(ImageRequest imageRequest);
 
-    Image updateImage(int imageId, Image image);
+    ImageResponse updateImage(int imageId, ImageRequest imageRequest);
 
     void deleteImage(int imageId);
 }

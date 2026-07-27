@@ -2,17 +2,18 @@ package com.example.services;
 
 import java.util.List;
 
-import com.example.entities.Contact;
+import com.example.dto.ContactRequest;
+import com.example.dto.ContactResponse;
 
 public interface ContactService {
 
-    List<Contact> getAllContacts();
+    List<ContactResponse> getAllContacts();
 
-    Contact getContactById(int contactId);
+    ContactResponse getContactById(int contactId);
 
-    Contact saveContact(Contact contact);
+    ContactResponse saveContact(ContactRequest contactRequest);
 
-    Contact updateContact(int contactId, Contact contact);
+    ContactResponse updateContact(int contactId, ContactRequest contactRequest);
 
     void deleteContact(int contactId);
 }

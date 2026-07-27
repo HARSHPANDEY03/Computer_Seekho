@@ -1,10 +1,13 @@
 package com.example.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.dto.ContactRequest;
+import com.example.dto.ContactResponse;
 import com.example.entities.Contact;
 import com.example.repositories.ContactRepository;
 
@@ -15,38 +18,75 @@ public class ContactServiceImpl implements ContactService {
     private ContactRepository contactRepository;
 
     @Override
-    public List<Contact> getAllContacts() {
-        return contactRepository.findAll();
-    }
+    public List<ContactResponse> getAllContacts() {
 
-    @Override
-    public Contact getContactById(int contactId) {
-        return contactRepository.findById(contactId).orElse(null);
-    }
+        List<Contact> contacts = contactRepository.findAll();
+        List<ContactResponse> responses = new ArrayList<>();
 
-    @Override
-    public Contact saveContact(Contact contact) {
-        return contactRepository.save(contact);
-    }
-
-    @Override
-    public Contact updateContact(int contactId, Contact contact) {
-
-        Contact existingContact = contactRepository.findById(contactId).orElse(null);
-
-        if (existingContact != null) {
-            existingContact.setName(contact.getName());
-            existingContact.setEmail(contact.getEmail());
-            existingContact.setMessage(contact.getMessage());
-
-            return contactRepository.save(existingContact);
+        for (Contact contact : contacts) {
+            responses.add(convertToResponse(contact));
         }
 
-        return null;
+        return responses;
+    }
+
+    @Override
+    public ContactResponse getContactById(int contactId) {
+
+        Contact contact = contactRepository.findById(contactId).orElse(null);
+
+        if (contact == null) {
+            return null;
+        }
+
+        return convertToResponse(contact);
+    }
+
+    @Override
+    public ContactResponse saveContact(ContactRequest request) {
+
+        Contact contact = new Contact();
+        contact.setName(request.getName());
+        contact.setEmail(request.getEmail());
+        contact.setMessage(request.getMessage());
+
+        Contact savedContact = contactRepository.save(contact);
+
+        return convertToResponse(savedContact);
+    }
+
+    @Override
+    public ContactResponse updateContact(int contactId, ContactRequest request) {
+
+        Contact contact = contactRepository.findById(contactId).orElse(null);
+
+        if (contact == null) {
+            return null;
+        }
+
+        contact.setName(request.getName());
+        contact.setEmail(request.getEmail());
+        contact.setMessage(request.getMessage());
+
+        Contact updatedContact = contactRepository.save(contact);
+
+        return convertToResponse(updatedContact);
     }
 
     @Override
     public void deleteContact(int contactId) {
         contactRepository.deleteById(contactId);
+    }
+
+    private ContactResponse convertToResponse(Contact contact) {
+
+        ContactResponse response = new ContactResponse();
+
+        response.setContactId(contact.getContactId());
+        response.setName(contact.getName());
+        response.setEmail(contact.getEmail());
+        response.setMessage(contact.getMessage());
+
+        return response;
     }
 }

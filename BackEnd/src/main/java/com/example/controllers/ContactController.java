@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.entities.Contact;
+import com.example.dto.ContactRequest;
+import com.example.dto.ContactResponse;
 import com.example.services.ContactService;
 
 @RestController
@@ -22,31 +23,27 @@ public class ContactController {
     @Autowired
     private ContactService contactService;
 
-    // Get all contacts
     @GetMapping
-    public List<Contact> getAllContacts() {
+    public List<ContactResponse> getAllContacts() {
         return contactService.getAllContacts();
     }
 
-    // Get contact by ID
     @GetMapping("/{id}")
-    public Contact getContactById(@PathVariable int id) {
+    public ContactResponse getContactById(@PathVariable int id) {
         return contactService.getContactById(id);
     }
 
-    // Save a new contact
     @PostMapping
-    public Contact saveContact(@RequestBody Contact contact) {
-        return contactService.saveContact(contact);
+    public ContactResponse saveContact(@RequestBody ContactRequest contactRequest) {
+        return contactService.saveContact(contactRequest);
     }
 
-    // Update an existing contact
     @PutMapping("/{id}")
-    public Contact updateContact(@PathVariable int id, @RequestBody Contact contact) {
-        return contactService.updateContact(id, contact);
+    public ContactResponse updateContact(@PathVariable int id,
+                                         @RequestBody ContactRequest contactRequest) {
+        return contactService.updateContact(id, contactRequest);
     }
 
-    // Delete a contact
     @DeleteMapping("/{id}")
     public String deleteContact(@PathVariable int id) {
         contactService.deleteContact(id);

@@ -3,9 +3,17 @@ package com.example.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.example.entities.Announcement;
+import com.example.dto.AnnouncementRequest;
+import com.example.dto.AnnouncementResponse;
 import com.example.services.AnnouncementService;
 
 @RestController
@@ -16,24 +24,28 @@ public class AnnouncementController {
     private AnnouncementService announcementService;
 
     @GetMapping
-    public List<Announcement> getAllAnnouncements() {
+    public List<AnnouncementResponse> getAllAnnouncements() {
         return announcementService.getAllAnnouncements();
     }
 
     @GetMapping("/{id}")
-    public Announcement getAnnouncementById(@PathVariable int id) {
+    public AnnouncementResponse getAnnouncementById(@PathVariable int id) {
         return announcementService.getAnnouncementById(id);
     }
 
     @PostMapping
-    public Announcement saveAnnouncement(@RequestBody Announcement announcement) {
-        return announcementService.saveAnnouncement(announcement);
+    public AnnouncementResponse saveAnnouncement(
+            @RequestBody AnnouncementRequest announcementRequest) {
+
+        return announcementService.saveAnnouncement(announcementRequest);
     }
 
     @PutMapping("/{id}")
-    public Announcement updateAnnouncement(@PathVariable int id,
-                                           @RequestBody Announcement announcement) {
-        return announcementService.updateAnnouncement(id, announcement);
+    public AnnouncementResponse updateAnnouncement(
+            @PathVariable int id,
+            @RequestBody AnnouncementRequest announcementRequest) {
+
+        return announcementService.updateAnnouncement(id, announcementRequest);
     }
 
     @DeleteMapping("/{id}")

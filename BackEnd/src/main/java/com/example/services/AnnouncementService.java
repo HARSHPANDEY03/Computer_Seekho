@@ -2,17 +2,19 @@ package com.example.services;
 
 import java.util.List;
 
-import com.example.entities.Announcement;
+import com.example.dto.AnnouncementRequest;
+import com.example.dto.AnnouncementResponse;
 
 public interface AnnouncementService {
 
-    List<Announcement> getAllAnnouncements();
+    List<AnnouncementResponse> getAllAnnouncements();
 
-    Announcement getAnnouncementById(int announcementId);
+    AnnouncementResponse getAnnouncementById(int announcementId);
 
-    Announcement saveAnnouncement(Announcement announcement);
+    AnnouncementResponse saveAnnouncement(AnnouncementRequest announcementRequest);
 
-    Announcement updateAnnouncement(int announcementId, Announcement announcement);
+    AnnouncementResponse updateAnnouncement(int announcementId,
+                                            AnnouncementRequest announcementRequest);
 
     void deleteAnnouncement(int announcementId);
 }
