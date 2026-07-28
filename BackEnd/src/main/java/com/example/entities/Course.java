@@ -1,5 +1,7 @@
 package com.example.entities;
 
+
+
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,6 +15,9 @@ public class Course {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "course_id")
     private Integer courseId;
+
+    @Column(name = "course_category", nullable = false, length = 50)
+    private String courseCategory;
 
     @Column(name = "course_name", nullable = false, length = 100)
     private String courseName;
@@ -44,21 +49,20 @@ public class Course {
     @Column(name = "cover_photo")
     private String coverPhoto;
 
+    @Column(name = "is_featured")
+    private Boolean isFeatured = false;
+
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Batch> batches;
 
-    // Default Constructor
-    public Course() {
-    }
+    public Course() {}
 
-    // Parameterized Constructor
-    public Course(Integer courseId, String courseName, String courseDescription,
-                  Integer courseDuration, BigDecimal courseFees,
-                  LocalDate courseFeesFrom, LocalDate courseFeesTo,
-                  String courseSyllabus, String ageGrpType,
-                  Boolean courseIsActive, String coverPhoto,
-                  List<Batch> batches) {
+    public Course(Integer courseId, String courseCategory, String courseName, String courseDescription,
+                  Integer courseDuration, BigDecimal courseFees, LocalDate courseFeesFrom, 
+                  LocalDate courseFeesTo, String courseSyllabus, String ageGrpType, 
+                  Boolean courseIsActive, String coverPhoto, Boolean isFeatured, List<Batch> batches) {
         this.courseId = courseId;
+        this.courseCategory = courseCategory;
         this.courseName = courseName;
         this.courseDescription = courseDescription;
         this.courseDuration = courseDuration;
@@ -69,121 +73,49 @@ public class Course {
         this.ageGrpType = ageGrpType;
         this.courseIsActive = courseIsActive;
         this.coverPhoto = coverPhoto;
+        this.isFeatured = isFeatured;
         this.batches = batches;
     }
 
-    // Getters and Setters
+    public Integer getCourseId() { return courseId; }
+    public void setCourseId(Integer courseId) { this.courseId = courseId; }
 
-    public Integer getCourseId() {
-        return courseId;
-    }
+    public String getCourseCategory() { return courseCategory; }
+    public void setCourseCategory(String courseCategory) { this.courseCategory = courseCategory; }
 
-    public void setCourseId(Integer courseId) {
-        this.courseId = courseId;
-    }
+    public String getCourseName() { return courseName; }
+    public void setCourseName(String courseName) { this.courseName = courseName; }
 
-    public String getCourseName() {
-        return courseName;
-    }
+    public String getCourseDescription() { return courseDescription; }
+    public void setCourseDescription(String courseDescription) { this.courseDescription = courseDescription; }
 
-    public void setCourseName(String courseName) {
-        this.courseName = courseName;
-    }
+    public Integer getCourseDuration() { return courseDuration; }
+    public void setCourseDuration(Integer courseDuration) { this.courseDuration = courseDuration; }
 
-    public String getCourseDescription() {
-        return courseDescription;
-    }
+    public BigDecimal getCourseFees() { return courseFees; }
+    public void setCourseFees(BigDecimal courseFees) { this.courseFees = courseFees; }
 
-    public void setCourseDescription(String courseDescription) {
-        this.courseDescription = courseDescription;
-    }
+    public LocalDate getCourseFeesFrom() { return courseFeesFrom; }
+    public void setCourseFeesFrom(LocalDate courseFeesFrom) { this.courseFeesFrom = courseFeesFrom; }
 
-    public Integer getCourseDuration() {
-        return courseDuration;
-    }
+    public LocalDate getCourseFeesTo() { return courseFeesTo; }
+    public void setCourseFeesTo(LocalDate courseFeesTo) { this.courseFeesTo = courseFeesTo; }
 
-    public void setCourseDuration(Integer courseDuration) {
-        this.courseDuration = courseDuration;
-    }
+    public String getCourseSyllabus() { return courseSyllabus; }
+    public void setCourseSyllabus(String courseSyllabus) { this.courseSyllabus = courseSyllabus; }
 
-    public BigDecimal getCourseFees() {
-        return courseFees;
-    }
+    public String getAgeGrpType() { return ageGrpType; }
+    public void setAgeGrpType(String ageGrpType) { this.ageGrpType = ageGrpType; }
 
-    public void setCourseFees(BigDecimal courseFees) {
-        this.courseFees = courseFees;
-    }
+    public Boolean getCourseIsActive() { return courseIsActive; }
+    public void setCourseIsActive(Boolean courseIsActive) { this.courseIsActive = courseIsActive; }
 
-    public LocalDate getCourseFeesFrom() {
-        return courseFeesFrom;
-    }
+    public String getCoverPhoto() { return coverPhoto; }
+    public void setCoverPhoto(String coverPhoto) { this.coverPhoto = coverPhoto; }
 
-    public void setCourseFeesFrom(LocalDate courseFeesFrom) {
-        this.courseFeesFrom = courseFeesFrom;
-    }
+    public Boolean getIsFeatured() { return isFeatured; }
+    public void setIsFeatured(Boolean isFeatured) { this.isFeatured = isFeatured; }
 
-    public LocalDate getCourseFeesTo() {
-        return courseFeesTo;
-    }
-
-    public void setCourseFeesTo(LocalDate courseFeesTo) {
-        this.courseFeesTo = courseFeesTo;
-    }
-
-    public String getCourseSyllabus() {
-        return courseSyllabus;
-    }
-
-    public void setCourseSyllabus(String courseSyllabus) {
-        this.courseSyllabus = courseSyllabus;
-    }
-
-    public String getAgeGrpType() {
-        return ageGrpType;
-    }
-
-    public void setAgeGrpType(String ageGrpType) {
-        this.ageGrpType = ageGrpType;
-    }
-
-    public Boolean getCourseIsActive() {
-        return courseIsActive;
-    }
-
-    public void setCourseIsActive(Boolean courseIsActive) {
-        this.courseIsActive = courseIsActive;
-    }
-
-    public String getCoverPhoto() {
-        return coverPhoto;
-    }
-
-    public void setCoverPhoto(String coverPhoto) {
-        this.coverPhoto = coverPhoto;
-    }
-
-    public List<Batch> getBatches() {
-        return batches;
-    }
-
-    public void setBatches(List<Batch> batches) {
-        this.batches = batches;
-    }
-
-    @Override
-    public String toString() {
-        return "Course{" +
-                "courseId=" + courseId +
-                ", courseName='" + courseName + '\'' +
-                ", courseDescription='" + courseDescription + '\'' +
-                ", courseDuration=" + courseDuration +
-                ", courseFees=" + courseFees +
-                ", courseFeesFrom=" + courseFeesFrom +
-                ", courseFeesTo=" + courseFeesTo +
-                ", courseSyllabus='" + courseSyllabus + '\'' +
-                ", ageGrpType='" + ageGrpType + '\'' +
-                ", courseIsActive=" + courseIsActive +
-                ", coverPhoto='" + coverPhoto + '\'' +
-                '}';
-    }
+    public List<Batch> getBatches() { return batches; }
+    public void setBatches(List<Batch> batches) { this.batches = batches; }
 }
