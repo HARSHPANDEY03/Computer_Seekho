@@ -2,8 +2,11 @@ package com.example.services;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.example.dto.StudentRequest;
 import com.example.dto.StudentResponse;
+
 
 public interface StudentService {
 
