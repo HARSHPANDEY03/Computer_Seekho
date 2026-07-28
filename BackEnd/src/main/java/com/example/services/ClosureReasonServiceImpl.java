@@ -12,26 +12,26 @@ import java.util.Optional;
 @Service // <-- This annotation is mandatory for Spring to detect the bean
 public class ClosureReasonServiceImpl implements ClosureReasonService {
 
-    @Autowired
-    private ClosureReasonRepository closureReasonRepository;
+	@Autowired
+	private ClosureReasonRepository closureReasonRepository;
 
-    @Override
-    public List<ClosureReason> getAllClosureReasons() {
-        return closureReasonRepository.findAll();
-    }
+	@Override
+	public List<ClosureReason> getAllClosureReasons() {
+		return closureReasonRepository.findAll();
+	}
 
-    @Override
-    public Optional<ClosureReason> getClosureReasonById(Integer id) {
-        return closureReasonRepository.findById(id);
-    }
+	@Override
+	public Optional<ClosureReason> getClosureReasonById(Integer id) {
+		return closureReasonRepository.findById(id);
+	}
 
-    @Override
-    public ClosureReason saveClosureReason(ClosureReason closureReason) {
-        return closureReasonRepository.save(closureReason);
-    }
+	@Override
+	public ClosureReason saveClosureReason(ClosureReason closureReason) {
+		return closureReasonRepository.save(closureReason);
+	}
 
-    @Override
-    public void deleteClosureReason(Integer id) {
-        closureReasonRepository.deleteById(id);
-    }
+	@Override
+	public void deleteClosureReason(Integer id) {
+		closureReasonRepository.deleteById(id);
+	}
 }
