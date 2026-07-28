@@ -9,7 +9,7 @@ public class DashboardSummaryResponse {
     private Double pendingFees;
 
     // Default Constructor
-    public DashboardSummaryResponse() {
+    public DashboardSummaryResponse(Long totalEnquiries2, Long todayFollowups2, Long totalAdmissions2) {
     }
 
     // Parameterized Constructor
