@@ -6,80 +6,85 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.dto.RoleRequest;
-import com.example.dto.RoleResponse;
-import com.example.services.RoleService;
+import com.example.entities.UserRole;
+import com.example.services.UserRoleService;
 
 @RestController
 @RequestMapping("/api/roles")
-public class RoleController {
+public class UserRoleController {
 
-    private final RoleService roleService;
+    private final UserRoleService userRoleService;
 
-    public RoleController(RoleService roleService) {
-        this.roleService = roleService;
+    public UserRoleController(UserRoleService userRoleService) {
+        this.userRoleService = userRoleService;
     }
 
-    // Get all roles
-    @GetMapping
-    public ResponseEntity<List<RoleResponse>> getAllRoles() {
-        return ResponseEntity.ok(roleService.getAllRoles());
-    }
-
-    // Get role by ID
-    @GetMapping("/{roleId}")
-    public ResponseEntity<RoleResponse> getRoleById(@PathVariable Integer roleId) {
-        return ResponseEntity.ok(roleService.getRoleById(roleId));
-    }
-
-    // Create new role
+    // Create Role
     @PostMapping
-    public ResponseEntity<RoleResponse> createRole(@RequestBody RoleRequest roleRequest) {
+    public ResponseEntity<UserRole> createRole(
+            @RequestBody UserRole userRole) {
 
-        RoleResponse response = roleService.createRole(roleRequest);
+        UserRole createdRole =
+                userRoleService.createRole(userRole);
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                createdRole,
+                HttpStatus.CREATED);
     }
 
-    // Update role
-    @PutMapping("/{roleId}")
-    public ResponseEntity<RoleResponse> updateRole(
-            @PathVariable Integer roleId,
-            @RequestBody RoleRequest roleRequest) {
+    // Get All Roles
+    @GetMapping
+    public ResponseEntity<List<UserRole>> getAllRoles() {
 
         return ResponseEntity.ok(
-                roleService.updateRole(roleId, roleRequest));
+                userRoleService.getAllRoles());
     }
 
-    // Delete role
+    // Get Role By ID
+    @GetMapping("/{roleId}")
+    public ResponseEntity<UserRole> getRoleById(
+            @PathVariable Integer roleId) {
+
+        return ResponseEntity.ok(
+                userRoleService.getRoleById(roleId));
+    }
+
+    // Update Role
+    @PutMapping("/{roleId}")
+    public ResponseEntity<UserRole> updateRole(
+            @PathVariable Integer roleId,
+            @RequestBody UserRole userRole) {
+
+        return ResponseEntity.ok(
+                userRoleService.updateRole(roleId, userRole));
+    }
+
+    // Activate Role
+    @PatchMapping("/{roleId}/activate")
+    public ResponseEntity<UserRole> activateRole(
+            @PathVariable Integer roleId) {
+
+        return ResponseEntity.ok(
+                userRoleService.activateRole(roleId));
+    }
+
+    // Deactivate Role
+    @PatchMapping("/{roleId}/deactivate")
+    public ResponseEntity<UserRole> deactivateRole(
+            @PathVariable Integer roleId) {
+
+        return ResponseEntity.ok(
+                userRoleService.deactivateRole(roleId));
+    }
+
+    // Delete Role
     @DeleteMapping("/{roleId}")
-    public ResponseEntity<String> deleteRole(@PathVariable Integer roleId) {
+    public ResponseEntity<String> deleteRole(
+            @PathVariable Integer roleId) {
 
-        roleService.deleteRole(roleId);
+        userRoleService.deleteRole(roleId);
 
-        return ResponseEntity.ok("Role deleted successfully.");
+        return ResponseEntity.ok(
+                "Role deleted successfully.");
     }
-
-    // Assign role to staff
-    @PatchMapping("/{roleId}/assign/{staffId}")
-    public ResponseEntity<String> assignRoleToStaff(
-            @PathVariable Integer roleId,
-            @PathVariable Integer staffId) {
-
-        roleService.assignRoleToStaff(roleId, staffId);
-
-        return ResponseEntity.ok("Role assigned successfully.");
-    }
-
-    // Remove role from staff
-    @PatchMapping("/{roleId}/remove/{staffId}")
-    public ResponseEntity<String> removeRoleFromStaff(
-            @PathVariable Integer roleId,
-            @PathVariable Integer staffId) {
-
-        roleService.removeRoleFromStaff(roleId, staffId);
-
-        return ResponseEntity.ok("Role removed successfully.");
-    }
-
 }
