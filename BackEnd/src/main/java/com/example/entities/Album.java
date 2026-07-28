@@ -1,6 +1,6 @@
 package com.example.entities;
 
-import java.awt.Image;
+
 import java.time.LocalDateTime;
 import java.util.List;
 

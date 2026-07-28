@@ -12,15 +12,18 @@ import com.example.entities.Student;
 public interface StudentRepository
         extends JpaRepository<Student, Integer> {
 
-    Optional<Student> findByEnquiryEnquiryId(Integer enquiryId);
+    Optional<Student> findByEnquiryEnquiryId(
+            Integer enquiryId);
 
-    boolean existsByEnquiryEnquiryId(Integer enquiryId);
+    boolean existsByEnquiryEnquiryId(
+            Integer enquiryId);
 
-    Optional<Student> findByStudentUsername(String studentUsername);
+    boolean existsByStudentUsername(
+            String studentUsername);
 
-    boolean existsByStudentUsername(String studentUsername);
+    List<Student> findByStudentNameContainingIgnoreCase(
+            String studentName);
 
-    List<Student> findByStudentNameContainingIgnoreCase(String studentName);
-
-    List<Student> findByStudentMobile(Long studentMobile);
+    List<Student> findByStudentMobile(
+            Long studentMobile);
 }

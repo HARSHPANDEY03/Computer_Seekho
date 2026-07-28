@@ -7,4 +7,5 @@ import com.example.entities.Followup;
 @Repository	
 public interface FollowupRepository extends JpaRepository<Followup ,Integer> {
 	List<Followup> findByEnquiryEnquiryIdOrderByFollowupDateDesc(int enquiryId);
+	List<Followup> findByStaffStaffIdOrderByFollowupDateDesc(int staffId);
 }

@@ -16,7 +16,9 @@ public interface StudentService {
 
     StudentResponse getStudentByEnquiryId(Integer enquiryId);
 
-    List<StudentResponse> searchStudents(String name, Long mobile);
+    List<StudentResponse> searchStudents(
+            String name,
+            Long mobile);
 
     StudentResponse updateStudent(  Integer studentId,   StudentRequest request);
 }
