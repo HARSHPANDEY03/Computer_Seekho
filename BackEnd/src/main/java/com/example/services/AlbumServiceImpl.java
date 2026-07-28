@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.dto.AlbumRequest;
-import com.example.dto.AlbumResponse;
+import com.example.dto.AlbumDTO;
+import com.example.dto.AlbumDTO;
 import com.example.entities.Album;
 import com.example.repositories.AlbumRepository;
 
@@ -18,10 +18,10 @@ public class AlbumServiceImpl implements AlbumService {
     private AlbumRepository albumRepository;
 
     @Override
-    public List<AlbumResponse> getAllAlbums() {
+    public List<AlbumDTO> getAllAlbums() {
 
         List<Album> albums = albumRepository.findAll();
-        List<AlbumResponse> responses = new ArrayList<>();
+        List<AlbumDTO> responses = new ArrayList<>();
 
         for (Album album : albums) {
             responses.add(convertToResponse(album));
@@ -31,7 +31,7 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Override
-    public AlbumResponse getAlbumById(int albumId) {
+    public AlbumDTO getAlbumById(int albumId) {
 
         Album album = albumRepository.findById(albumId).orElse(null);
 
@@ -43,7 +43,7 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Override
-    public AlbumResponse saveAlbum(AlbumRequest request) {
+    public AlbumDTO saveAlbum(AlbumDTO request) {
 
         Album album = new Album();
 
@@ -59,7 +59,7 @@ public class AlbumServiceImpl implements AlbumService {
     }
 
     @Override
-    public AlbumResponse updateAlbum(int albumId, AlbumRequest request) {
+    public AlbumDTO updateAlbum(int albumId, AlbumDTO request) {
 
         Album album = albumRepository.findById(albumId).orElse(null);
 
@@ -83,9 +83,9 @@ public class AlbumServiceImpl implements AlbumService {
         albumRepository.deleteById(albumId);
     }
 
-    private AlbumResponse convertToResponse(Album album) {
+    private AlbumDTO convertToResponse(Album album) {
 
-        AlbumResponse response = new AlbumResponse();
+        AlbumDTO response = new AlbumDTO();
 
         response.setAlbumId(album.getAlbumId());
         response.setAlbumName(album.getAlbumName());

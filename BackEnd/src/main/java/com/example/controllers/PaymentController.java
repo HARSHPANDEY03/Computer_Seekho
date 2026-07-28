@@ -11,7 +11,7 @@ import com.example.dto.PaymentRequestDTO;
 import com.example.dto.PaymentResponseDTO;
 import com.example.services.PaymentService;
 
-@RestController
+//@RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
 

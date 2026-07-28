@@ -2,17 +2,29 @@ package com.example.dto;
 
 import java.time.LocalDateTime;
 
-public class AlbumRequest {
+public class AlbumDTO {
 
+    private Integer albumId;
     private String albumName;
     private String albumDescription;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private boolean albumIsActive;
 
-    public AlbumRequest() {
+    // getters and setters
+
+
+    public AlbumDTO() {
+    }
+    
+    public int getAlbumId() {
+        return albumId;
     }
 
+    public void setAlbumId(int albumId) {
+        this.albumId = albumId;
+    }
+    
     public String getAlbumName() {
         return albumName;
     }
