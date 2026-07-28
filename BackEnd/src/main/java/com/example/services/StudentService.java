@@ -20,7 +20,7 @@ public interface StudentService {
             String name,
             Long mobile);
 
-  StudentResponse updateStudent(
+StudentResponse updateStudent(
             Integer studentId,
             StudentRequest request);
 }
