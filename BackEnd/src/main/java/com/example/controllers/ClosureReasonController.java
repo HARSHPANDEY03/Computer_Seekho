@@ -13,33 +13,32 @@ import java.util.List;
 @RequestMapping("/api/closure-reasons")
 public class ClosureReasonController {
 
-    @Autowired
-    private ClosureReasonService closureReasonService;
+	@Autowired
+	private ClosureReasonService closureReasonService;
 
-    @GetMapping
-    public ResponseEntity<List<ClosureReason>> getAllClosureReasons() {
-        return ResponseEntity.ok(closureReasonService.getAllClosureReasons());
-    }
+	@GetMapping
+	public ResponseEntity<List<ClosureReason>> getAllClosureReasons() {
+		return ResponseEntity.ok(closureReasonService.getAllClosureReasons());
+	}
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ClosureReason> getClosureReasonById(@PathVariable Integer id) {
-        return closureReasonService.getClosureReasonById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-    }
+	@GetMapping("/{id}")
+	public ResponseEntity<ClosureReason> getClosureReasonById(@PathVariable Integer id) {
+		return closureReasonService.getClosureReasonById(id).map(ResponseEntity::ok)
+				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+	}
 
-    @PostMapping
-    public ResponseEntity<ClosureReason> createClosureReason(@RequestBody ClosureReason closureReason) {
-        ClosureReason savedReason = closureReasonService.saveClosureReason(closureReason);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedReason);
-    }
+	@PostMapping
+	public ResponseEntity<ClosureReason> createClosureReason(@RequestBody ClosureReason closureReason) {
+		ClosureReason savedReason = closureReasonService.saveClosureReason(closureReason);
+		return ResponseEntity.status(HttpStatus.CREATED).body(savedReason);
+	}
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteClosureReason(@PathVariable Integer id) {
-        if (closureReasonService.getClosureReasonById(id).isPresent()) {
-            closureReasonService.deleteClosureReason(id);
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteClosureReason(@PathVariable Integer id) {
+		if (closureReasonService.getClosureReasonById(id).isPresent()) {
+			closureReasonService.deleteClosureReason(id);
+			return ResponseEntity.noContent().build();
+		}
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	}
 }
