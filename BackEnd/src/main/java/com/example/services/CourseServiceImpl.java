@@ -43,7 +43,7 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Course not found with id: " + id));
 
-        course.setCourseCategory(request.getCourseCategory());
+       // course.setCourseCategory(request.getCourseCategory());
         course.setCourseName(request.getCourseName());
         course.setCourseDescription(request.getCourseDescription());
         course.setCourseDuration(request.getCourseDuration());

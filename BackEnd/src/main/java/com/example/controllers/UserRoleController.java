@@ -6,9 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.dto.RoleRequest;
-import com.example.dto.RoleResponse;
-import com.example.services.RoleService;
 
 @RestController
 @RequestMapping("/api/roles")
