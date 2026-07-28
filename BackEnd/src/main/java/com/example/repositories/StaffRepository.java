@@ -7,27 +7,26 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.example.entities.Staff;
-import com.example.entities.UserRole;
 
 @Repository
-public interface StaffRepository extends JpaRepository<Staff, Integer> {
+public interface StaffRepository
+        extends JpaRepository<Staff, Integer> {
 
-
+    // Used for Login
     Optional<Staff> findByStaffUsername(String staffUsername);
 
+    // Find by email
     Optional<Staff> findByStaffEmail(String staffEmail);
 
-    
-
+    // Duplicate username validation
     boolean existsByStaffUsername(String staffUsername);
 
+    // Duplicate email validation
     boolean existsByStaffEmail(String staffEmail);
 
-
+    // Search staff
     List<Staff> findByStaffNameContainingIgnoreCase(String staffName);
 
+    // Find staff by role
     List<Staff> findByStaffRole(String staffRole);
-
-    List<Staff> findByUserRole(UserRole userRole);
-
 }
