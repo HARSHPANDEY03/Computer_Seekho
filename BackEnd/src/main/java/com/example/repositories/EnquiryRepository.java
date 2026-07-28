@@ -17,4 +17,9 @@ public interface EnquiryRepository extends JpaRepository<Enquiry, Integer> {
 	// date
 	@Query("SELECT e FROM Enquiry e WHERE e.staff IS NULL AND e.enquiryDate <= :cutoffDate")
 	List<Enquiry> findUnassignedOlderThan(@Param("cutoffDate") LocalDate cutoffDate);
+	@Query("SELECT e FROM Enquiry e WHERE e.staff.staffId = :staffId AND e.followupDate = :today AND e.enquiryProcessedFlag = false")
+	List<Enquiry> findTodayDueForStaff(@Param("staffId") Integer staffId, @Param("today") LocalDate today);
+
+	@Query("SELECT e FROM Enquiry e WHERE e.staff.staffId = :staffId AND e.followupDate < :today AND e.enquiryProcessedFlag = false")
+	List<Enquiry> findOverdueForStaff(@Param("staffId") Integer staffId, @Param("today") LocalDate today);
 }
