@@ -10,6 +10,7 @@ public interface StudentService {
     StudentResponse registerStudent(StudentRequest request);
 
     List<StudentResponse> getAllStudents();
+    
 
     StudentResponse getStudentById(Integer studentId);
 
@@ -19,7 +20,7 @@ public interface StudentService {
             String name,
             Long mobile);
 
-    StudentResponse updateStudent(
+StudentResponse updateStudent(
             Integer studentId,
             StudentRequest request);
 }
