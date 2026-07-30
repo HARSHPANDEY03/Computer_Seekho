@@ -1,6 +1,7 @@
 package com.example.entities;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "staff")
@@ -26,6 +27,9 @@ public class Staff {
     @Column(name = "staff_username", unique = true, length = 100)
     private String staffUsername;
 
+    // @JsonIgnore: never send the password hash back to the browser in
+    // any API response (staff lists, enquiry.staff, followup.staff, etc.)
+    @JsonIgnore
     @Column(name = "staff_password")
     private String staffPassword;
 

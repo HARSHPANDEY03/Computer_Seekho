@@ -2,6 +2,7 @@ package com.example.entities;
 
 import java.util.List;
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "closure_reason")
@@ -15,6 +16,10 @@ public class ClosureReason {
 	@Column(name = "closure_reason_desc", nullable = false)
 	private String closureReasonDesc;
 
+	// @JsonIgnore: without this, serializing an Enquiry that has this
+	// ClosureReason set recurses forever (enquiry -> closureReason ->
+	// enquiries -> closureReason -> ...) and crashes the server mid-response.
+	@JsonIgnore
 	@OneToMany(mappedBy = "closureReason", cascade = CascadeType.ALL)
 	private List<Enquiry> enquiries;
 
