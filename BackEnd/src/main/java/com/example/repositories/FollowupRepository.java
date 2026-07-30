@@ -1,3 +1,4 @@
+// src/main/java/com/example/repositories/FollowupRepository.java
 package com.example.repositories;
 import java.time.LocalDate;
 import java.util.List;
@@ -10,5 +11,6 @@ public interface FollowupRepository extends JpaRepository<Followup ,Integer> {
 	List<Followup> findByEnquiryEnquiryIdOrderByFollowupDateDesc(int enquiryId);
 	List<Followup> findByStaffStaffIdOrderByFollowupDateDesc(int staffId);
 	Long countByFollowupDate(LocalDate today);
-	
+	void deleteByEnquiryEnquiryId(Integer enquiryId);
+
 }

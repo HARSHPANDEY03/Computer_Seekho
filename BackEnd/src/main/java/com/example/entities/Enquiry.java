@@ -24,7 +24,7 @@ public class Enquiry {
 	@Column(name = "enquirer_alternate_mobile")
 	private Long enquirerAlternateMobile;
 
-	@Column(name = "enquirer_email_id", unique = true)
+	@Column(name = "enquirer_email_id")
 	private String enquirerEmailId;
 
 	@Column(name = "enquiry_date")

@@ -29,7 +29,7 @@ public class EnquiryController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Enquiry> getEnquiryById(@PathVariable Integer id) {
+	public ResponseEntity<Enquiry> getEnquiryById(@PathVariable("id") Integer id) {
 		return enquiryService.getEnquiryById(id).map(ResponseEntity::ok)
 				.orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 	}
@@ -50,7 +50,7 @@ public class EnquiryController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Enquiry> updateEnquiry(@PathVariable Integer id, @RequestBody Enquiry updatedEnquiry) {
+	public ResponseEntity<Enquiry> updateEnquiry(@PathVariable("id") Integer id, @RequestBody Enquiry updatedEnquiry) {
 		Optional<Enquiry> existingEnquiryOpt = enquiryService.getEnquiryById(id);
 
 		if (existingEnquiryOpt.isPresent()) {
@@ -87,14 +87,14 @@ public class EnquiryController {
 	}
 
 	@PutMapping("/{id}/assign-staff")
-	public ResponseEntity<Enquiry> assignStaffToEnquiry(@PathVariable Integer id,
+	public ResponseEntity<Enquiry> assignStaffToEnquiry(@PathVariable("id") Integer id,
 			@RequestBody AssignStaffRequest request) {
 		Enquiry updatedEnquiry = enquiryService.assignStaff(id, request);
 		return ResponseEntity.ok(updatedEnquiry);
 	}
 
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteEnquiry(@PathVariable Integer id) {
+	public ResponseEntity<Void> deleteEnquiry(@PathVariable("id") Integer id) {
 		if (enquiryService.getEnquiryById(id).isPresent()) {
 			enquiryService.deleteEnquiry(id);
 			return ResponseEntity.noContent().build();

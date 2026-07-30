@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "user_role")
@@ -23,6 +24,7 @@ public class UserRole {
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "userRole",
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY)
@@ -42,7 +44,6 @@ public class UserRole {
     // ==========================
     // Getters and Setters
     // ==========================
-
     public Integer getUserId() {
         return userId;
     }
@@ -86,7 +87,6 @@ public class UserRole {
     // ==========================
     // Utility Methods
     // ==========================
-
     public void addStaff(Staff staff) {
         staffList.add(staff);
         staff.setUserRole(this);
