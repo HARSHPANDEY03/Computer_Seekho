@@ -28,17 +28,17 @@ public class CourseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CourseResponse> getCourseById(@PathVariable Integer id) {
+    public ResponseEntity<CourseResponse> getCourseById(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(courseService.getCourseById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CourseResponse> updateCourse(@PathVariable Integer id, @RequestBody CourseRequest courseRequest) {
+    public ResponseEntity<CourseResponse> updateCourse(@PathVariable("id") Integer id, @RequestBody CourseRequest courseRequest) {
         return ResponseEntity.ok(courseService.updateCourse(id, courseRequest));
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<CourseResponse> updateCourseStatus(@PathVariable Integer id, @RequestParam Boolean active) {
+    public ResponseEntity<CourseResponse> updateCourseStatus(@PathVariable("id") Integer id, @RequestParam("active") Boolean active) {
         return ResponseEntity.ok(courseService.updateCourseStatus(id, active));
     }
 
@@ -48,7 +48,7 @@ public class CourseController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<CourseResponse>> searchCourses(@RequestParam String keyword) {
+    public ResponseEntity<List<CourseResponse>> searchCourses(@RequestParam("keyword") String keyword) {
         return ResponseEntity.ok(courseService.searchCourses(keyword));
     }
 }

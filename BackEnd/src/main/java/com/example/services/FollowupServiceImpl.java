@@ -68,7 +68,8 @@ public class FollowupServiceImpl implements FollowupService {
         followup = followupRepository.save(followup);
 
         int current = enquiry.getInquiryCounter() != null ? enquiry.getInquiryCounter() : 0;
-        enquiry.setInquiryCounter(current + 1);
+        int updatedCount = current + 1;
+        enquiry.setInquiryCounter(updatedCount);
 
         if (request.getClosureReasonId() != null) {
             ClosureReason reason = closureReasonRepository.findById(request.getClosureReasonId())
@@ -77,11 +78,15 @@ public class FollowupServiceImpl implements FollowupService {
             enquiry.setClosureReason(reason);
             enquiry.setClosureReasonText(request.getClosureReasonText());
             enquiry.setEnquiryProcessedFlag(true);
+        } else if (updatedCount >= 3) {
+            // Policy: 3 follow-ups with no resolution closes the enquiry automatically.
+            enquiry.setEnquiryProcessedFlag(true);
+            enquiry.setClosureReasonText("Auto-closed: 3 follow-ups completed with no response/decision.");
         } else {
             enquiry.setFollowupDate(
                     request.getNextFollowupDate() != null
                             ? request.getNextFollowupDate()
-                            : LocalDate.now().plusDays(3));
+                            : LocalDate.now().plusDays(2));
         }
 
         enquiryRepository.save(enquiry);
