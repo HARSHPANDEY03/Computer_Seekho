@@ -8,21 +8,18 @@ public class DashboardSummaryResponse {
     private Double totalFeesReceived;
     private Double pendingFees;
 
-    // Default Constructor
-    public DashboardSummaryResponse() {
-    }
+    
 
-    // Parameterized Constructor
-    public DashboardSummaryResponse(Long totalEnquiries,
-                                    Long todayFollowups,
-                                    Long totalAdmissions,
-                                    Double totalFeesReceived,
-                                    Double pendingFees) {
+    public DashboardSummaryResponse(
+            Long totalEnquiries,
+            Long todayFollowups,
+            Long totalAdmissions) {
+
         this.totalEnquiries = totalEnquiries;
         this.todayFollowups = todayFollowups;
         this.totalAdmissions = totalAdmissions;
-        this.totalFeesReceived = totalFeesReceived;
-        this.pendingFees = pendingFees;
+        this.totalFeesReceived = 0.0;
+        this.pendingFees = 0.0;
     }
 
     // Getters and Setters

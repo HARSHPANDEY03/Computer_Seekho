@@ -19,6 +19,11 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public CourseResponse createCourse(CourseRequest request) {
+        if (courseRepository.existsByCourseNameIgnoreCase(request.getCourseName())) {
+            throw new RuntimeException(
+                    "A course named \"" + request.getCourseName() + "\" already exists. " +
+                    "Use the existing course instead of creating a duplicate.");
+        }
         Course course = mapToEntity(request);
         Course savedCourse = courseRepository.save(course);
         return mapToResponse(savedCourse);
@@ -43,7 +48,7 @@ public class CourseServiceImpl implements CourseService {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Course not found with id: " + id));
 
-        course.setCourseCategory(request.getCourseCategory());
+       // course.setCourseCategory(request.getCourseCategory());
         course.setCourseName(request.getCourseName());
         course.setCourseDescription(request.getCourseDescription());
         course.setCourseDuration(request.getCourseDuration());

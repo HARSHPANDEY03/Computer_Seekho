@@ -11,13 +11,16 @@ public interface StudentService {
 
     List<StudentResponse> getAllStudents();
     
+
     StudentResponse getStudentById(Integer studentId);
 
     StudentResponse getStudentByEnquiryId(Integer enquiryId);
 
-    List<StudentResponse> searchStudents(String name, Long mobile);
+    List<StudentResponse> searchStudents(
+            String name,
+            Long mobile);
 
-    StudentResponse updateStudent(
+StudentResponse updateStudent(
             Integer studentId,
             StudentRequest request);
 }

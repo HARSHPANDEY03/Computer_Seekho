@@ -11,4 +11,5 @@ import java.util.List;
 public interface CourseRepository extends JpaRepository<Course, Integer> {
     List<Course> findByCourseIsActiveTrue();
     List<Course> findByCourseNameContainingIgnoreCaseOrCourseCategoryContainingIgnoreCase(String name, String category);
+    boolean existsByCourseNameIgnoreCase(String courseName);
 }

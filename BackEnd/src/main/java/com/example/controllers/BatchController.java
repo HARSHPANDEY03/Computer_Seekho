@@ -29,27 +29,27 @@ public class BatchController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BatchResponse> getBatchById(@PathVariable Integer id) {
+    public ResponseEntity<BatchResponse> getBatchById(@PathVariable("id") Integer id) {
         return ResponseEntity.ok(batchService.getBatchById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BatchResponse> updateBatch(@PathVariable Integer id, @RequestBody BatchRequest batchRequest) {
+    public ResponseEntity<BatchResponse> updateBatch(@PathVariable("id") Integer id, @RequestBody BatchRequest batchRequest) {
         return ResponseEntity.ok(batchService.updateBatch(id, batchRequest));
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<BatchResponse> updateBatchStatus(@PathVariable Integer id, @RequestParam Boolean active) {
+    public ResponseEntity<BatchResponse> updateBatchStatus(@PathVariable("id") Integer id, @RequestParam("active") Boolean active) {
         return ResponseEntity.ok(batchService.updateBatchStatus(id, active));
     }
 
     @GetMapping("/course/{courseId}")
-    public ResponseEntity<List<BatchResponse>> getBatchesByCourseId(@PathVariable Integer courseId) {
+    public ResponseEntity<List<BatchResponse>> getBatchesByCourseId(@PathVariable("courseId") Integer courseId) {
         return ResponseEntity.ok(batchService.getBatchesByCourseId(courseId));
     }
 
     @GetMapping("/course/{courseId}/active")
-    public ResponseEntity<List<BatchResponse>> getActiveBatchesByCourseId(@PathVariable Integer courseId) {
+    public ResponseEntity<List<BatchResponse>> getActiveBatchesByCourseId(@PathVariable("courseId") Integer courseId) {
         return ResponseEntity.ok(batchService.getActiveBatchesByCourseId(courseId));
     }
 }
