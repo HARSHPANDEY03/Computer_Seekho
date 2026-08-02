@@ -1,3 +1,8 @@
+/*`src/api/courses.js`:
+   - Added REST API request functions for Courses (`getAllCourses`, `getActiveCourses`, `getCourseById`, `searchCourses`, `createCourse`, `updateCourse`, `updateCourseStatus`).
+   - Added REST API request functions for Batches (`getAllBatches`, `getBatchById`, `getBatchesByCourse`, `getActiveBatchesByCourse`, `createBatch`, `updateBatch`, `updateBatchStatus`).*/
+
+
 import { client } from './client';
 
 // ---- Courses ----
