@@ -40,4 +40,26 @@ public class ExcelUploadController {
                 excelUploadService.uploadExcel(file));
     }
 
+    @PostMapping(
+            value = "/recruiters/validate",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ExcelValidationResponse>
+    validateRecruiterExcel(
+            @RequestParam("file") MultipartFile file) {
+
+        return ResponseEntity.ok(
+                excelUploadService.validateRecruiterExcel(file));
+    }
+
+    @PostMapping(
+            value = "/recruiters/upload",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ExcelImportResponse>
+    uploadRecruiterExcel(
+            @RequestParam("file") MultipartFile file) {
+
+        return ResponseEntity.ok(
+                excelUploadService.uploadRecruiterExcel(file));
+    }
+
 }
