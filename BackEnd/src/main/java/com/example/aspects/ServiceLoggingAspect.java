@@ -1,7 +1,5 @@
 package com.example.aspects;
 
-import java.util.concurrent.TimeUnit;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -14,53 +12,37 @@ import org.springframework.stereotype.Component;
 public class ServiceLoggingAspect {
 
     private static final Logger log =
-            LoggerFactory.getLogger(
-                    ServiceLoggingAspect.class
-            );
+            LoggerFactory.getLogger(ServiceLoggingAspect.class);
 
-    @Around(
-        "execution(public * com.example.services..*(..))"
-    )
+    @Around("execution(public * com.example.services..*(..))")
     public Object logServiceMethod(
-            ProceedingJoinPoint joinPoint)
-            throws Throwable {
+            ProceedingJoinPoint joinPoint) throws Throwable {
 
-        String className =
-                joinPoint.getSignature()
-                        .getDeclaringType()
-                        .getSimpleName();
+        String className = joinPoint
+                .getSignature()
+                .getDeclaringType()
+                .getSimpleName();
 
-        String methodName =
-                joinPoint.getSignature()
-                        .getName();
+        String methodName = joinPoint
+                .getSignature()
+                .getName();
 
-        long startTime =
-                System.nanoTime();
+        long startTime = System.currentTimeMillis();
 
         log.info(
-                "SERVICE START: {}.{}",
+                "SERVICE START | {}.{}",
                 className,
                 methodName
         );
 
         try {
-
-            /*
-             * This line runs the real service method.
-             */
-            Object result =
-                    joinPoint.proceed();
-
-            long endTime =
-                    System.nanoTime();
+            Object result = joinPoint.proceed();
 
             long duration =
-                    TimeUnit.NANOSECONDS.toMillis(
-                            endTime - startTime
-                    );
+                    System.currentTimeMillis() - startTime;
 
             log.info(
-                    "SERVICE SUCCESS: {}.{} completed in {} ms",
+                    "SERVICE SUCCESS | {}.{} | {} ms",
                     className,
                     methodName,
                     duration
@@ -70,26 +52,17 @@ public class ServiceLoggingAspect {
 
         } catch (Throwable exception) {
 
-            long endTime =
-                    System.nanoTime();
-
             long duration =
-                    TimeUnit.NANOSECONDS.toMillis(
-                            endTime - startTime
-                    );
+                    System.currentTimeMillis() - startTime;
 
             log.error(
-                    "SERVICE FAILED: {}.{} after {} ms. Error={}",
+                    "SERVICE FAILED | {}.{} | {} ms | {}",
                     className,
                     methodName,
                     duration,
                     exception.getMessage()
             );
 
-            /*
-             * Do not remove this.
-             * We must send the exception forward.
-             */
             throw exception;
         }
     }
