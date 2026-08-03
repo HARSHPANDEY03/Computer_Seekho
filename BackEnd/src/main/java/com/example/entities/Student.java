@@ -141,6 +141,16 @@ public class Student {
     private Course course;
 
     /*
+     * student_email
+     * VARCHAR(150)
+     *
+     * Used to send the admission-confirmation email (receipt + admission
+     * slip). Optional - some walk-in admissions may not have one.
+     */
+    @Column(name = "student_email", length = 150)
+    private String studentEmail;
+
+    /*
      * student_username
      * VARCHAR(100)
      * Unique Key
@@ -273,6 +283,14 @@ public class Student {
 
     public void setStudentMobile(Long studentMobile) {
         this.studentMobile = studentMobile;
+    }
+
+    public String getStudentEmail() {
+        return studentEmail;
+    }
+
+    public void setStudentEmail(String studentEmail) {
+        this.studentEmail = studentEmail;
     }
 
     public BigDecimal getCourseFee() {

@@ -1,3 +1,4 @@
+// StaffController.java
 package com.example.controllers;
 
 import java.util.List;
@@ -22,10 +23,6 @@ public class StaffController {
         this.staffService = staffService;
     }
 
-    // =====================================================
-    // CREATE STAFF
-    // =====================================================
-
     @PostMapping
     public ResponseEntity<StaffResponse> createStaff(
             @RequestBody StaffRequest staffRequest) {
@@ -38,10 +35,6 @@ public class StaffController {
                 HttpStatus.CREATED);
     }
 
-    // =====================================================
-    // GET ALL STAFF
-    // =====================================================
-
     @GetMapping
     public ResponseEntity<List<StaffResponse>> getAllStaff() {
 
@@ -49,25 +42,17 @@ public class StaffController {
                 staffService.getAllStaff());
     }
 
-    // =====================================================
-    // GET STAFF BY ID
-    // =====================================================
-
     @GetMapping("/{staffId}")
     public ResponseEntity<StaffResponse> getStaffById(
-            @PathVariable Integer staffId) {
+            @PathVariable("staffId") Integer staffId) {
 
         return ResponseEntity.ok(
                 staffService.getStaffById(staffId));
     }
 
-    // =====================================================
-    // UPDATE STAFF
-    // =====================================================
-
     @PutMapping("/{staffId}")
     public ResponseEntity<StaffResponse> updateStaff(
-            @PathVariable Integer staffId,
+            @PathVariable("staffId") Integer staffId,
             @RequestBody StaffRequest staffRequest) {
 
         return ResponseEntity.ok(
@@ -76,27 +61,18 @@ public class StaffController {
                         staffRequest));
     }
 
-    // =====================================================
-    // DELETE STAFF
-    // =====================================================
-
     @DeleteMapping("/{staffId}")
-    public ResponseEntity<String> deleteStaff(
-            @PathVariable Integer staffId) {
+    public ResponseEntity<Void> deleteStaff(
+            @PathVariable("staffId") Integer staffId) {
 
         staffService.deleteStaff(staffId);
 
-        return ResponseEntity.ok(
-                "Staff deleted successfully.");
+        return ResponseEntity.noContent().build();
     }
-
-    // =====================================================
-    // SEARCH STAFF
-    // =====================================================
 
     @GetMapping("/search")
     public ResponseEntity<List<StaffResponse>> searchStaff(
-            @RequestParam String keyword) {
+            @RequestParam("keyword") String keyword) {
 
         return ResponseEntity.ok(
                 staffService.searchStaffByName(keyword));

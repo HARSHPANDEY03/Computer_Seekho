@@ -1,3 +1,4 @@
+// FollowupController.java
 package com.example.controllers;
 
 import java.util.List;
@@ -20,12 +21,12 @@ public class FollowupController {
     private FollowupService followupService;
 
     @GetMapping("/enquiry/{enquiryId}")
-    public List<Followup> getFollowupHistory(@PathVariable Integer enquiryId) {
+    public List<Followup> getFollowupHistory(@PathVariable("enquiryId") Integer enquiryId) {
         return followupService.getFollowupHistory(enquiryId);
     }
 
     @GetMapping("/staff/{staffId}")
-    public List<Followup> getHistoryForStaff(@PathVariable Integer staffId) {
+    public List<Followup> getHistoryForStaff(@PathVariable("staffId") Integer staffId) {
         return followupService.getHistoryForStaff(staffId);
     }
 
@@ -35,35 +36,35 @@ public class FollowupController {
     }
 
     @GetMapping("/{id}")
-    public Followup getFollowupById(@PathVariable Integer id) {
+    public Followup getFollowupById(@PathVariable("id") Integer id) {
         return followupService.getFollowupById(id);
     }
 
     @PostMapping
     public ResponseEntity<Followup> logFollowup(
             @RequestBody FollowupRequest request,
-            @RequestParam Integer staffId) {
+            @RequestParam("staffId") Integer staffId) {
         Followup saved = followupService.logFollowup(request, staffId);
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
     @GetMapping("/today")
-    public List<Enquiry> today(@RequestParam Integer staffId) {
+    public List<Enquiry> today(@RequestParam("staffId") Integer staffId) {
         return followupService.getTodayForStaff(staffId);
     }
 
     @GetMapping("/overdue")
-    public List<Enquiry> overdue(@RequestParam Integer staffId) {
+    public List<Enquiry> overdue(@RequestParam("staffId") Integer staffId) {
         return followupService.getOverdueForStaff(staffId);
     }
 
     @GetMapping("/staff/{staffId}/today")
-    public List<Enquiry> todayForStaff(@PathVariable Integer staffId) {
+    public List<Enquiry> todayForStaff(@PathVariable("staffId") Integer staffId) {
         return followupService.getTodayForStaff(staffId);
     }
 
     @GetMapping("/staff/{staffId}/overdue")
-    public List<Enquiry> overdueForStaff(@PathVariable Integer staffId) {
+    public List<Enquiry> overdueForStaff(@PathVariable("staffId") Integer staffId) {
         return followupService.getOverdueForStaff(staffId);
     }
 }

@@ -1,3 +1,4 @@
+// AlbumController.java
 package com.example.controllers;
 
 import java.util.List;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.http.ResponseEntity;
 
 import com.example.dto.AlbumDTO;
 
@@ -29,7 +32,7 @@ public class AlbumController {
     }
 
     @GetMapping("/{id}")
-    public AlbumDTO getAlbumById(@PathVariable int id) {
+    public AlbumDTO getAlbumById(@PathVariable("id") int id) {
         return albumService.getAlbumById(id);
     }
 
@@ -39,14 +42,14 @@ public class AlbumController {
     }
 
     @PutMapping("/{id}")
-    public AlbumDTO updateAlbum(@PathVariable int id,
+    public AlbumDTO updateAlbum(@PathVariable("id") int id,
                                      @RequestBody AlbumDTO albumRequest) {
         return albumService.updateAlbum(id, albumRequest);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteAlbum(@PathVariable int id) {
+    public ResponseEntity<Void> deleteAlbum(@PathVariable("id") int id) {
         albumService.deleteAlbum(id);
-        return "Album deleted successfully.";
+        return ResponseEntity.noContent().build();
     }
 }

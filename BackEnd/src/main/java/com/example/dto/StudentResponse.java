@@ -14,6 +14,7 @@ public class StudentResponse {
     private LocalDate studentDob;
     private String studentQualification;
     private Long studentMobile;
+    private String studentEmail;
     private BigDecimal courseFee;
     private Integer batchId;
     private String batchName;
@@ -94,6 +95,14 @@ public class StudentResponse {
 
     public void setStudentMobile(Long studentMobile) {
         this.studentMobile = studentMobile;
+    }
+
+    public String getStudentEmail() {
+        return studentEmail;
+    }
+
+    public void setStudentEmail(String studentEmail) {
+        this.studentEmail = studentEmail;
     }
 
     public BigDecimal getCourseFee() {
