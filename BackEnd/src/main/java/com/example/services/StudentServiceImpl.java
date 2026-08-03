@@ -100,6 +100,7 @@ public class StudentServiceImpl implements StudentService {
         student.setStudentQualification(
                 request.getStudentQualification());
         student.setStudentMobile(request.getStudentMobile());
+        student.setStudentEmail(request.getStudentEmail());
         student.setCourseFee(request.getCourseFee());
         student.setCourse(course);
         student.setBatch(batch);
@@ -167,7 +168,27 @@ public class StudentServiceImpl implements StudentService {
     @Transactional(readOnly = true)
     public List<StudentResponse> searchStudents(
             String name,
-            Long mobile) {
+            Long mobile,
+            Integer studentId,
+            Integer admissionId) {
+
+        // Exact-ID lookups are unambiguous, unlike name/mobile - handle
+        // them first and short-circuit. Returns an empty list rather than
+        // throwing when nothing matches, same as every other search branch
+        // below (a "no results" search is not an error).
+        if (studentId != null) {
+            return studentRepository.findById(studentId)
+                    .map(this::convertToResponse)
+                    .map(List::of)
+                    .orElseGet(List::of);
+        }
+
+        if (admissionId != null) {
+            return studentRepository.findByEnquiryEnquiryId(admissionId)
+                    .map(this::convertToResponse)
+                    .map(List::of)
+                    .orElseGet(List::of);
+        }
 
         boolean hasName =
                 name != null && !name.isBlank();
@@ -268,6 +289,7 @@ public class StudentServiceImpl implements StudentService {
         student.setStudentQualification(
                 request.getStudentQualification());
         student.setStudentMobile(request.getStudentMobile());
+        student.setStudentEmail(request.getStudentEmail());
         student.setCourseFee(request.getCourseFee());
         student.setCourse(course);
         student.setBatch(batch);
@@ -343,6 +365,9 @@ public class StudentServiceImpl implements StudentService {
 
         response.setStudentMobile(
                 student.getStudentMobile());
+
+        response.setStudentEmail(
+                student.getStudentEmail());
 
         response.setCourseFee(
                 student.getCourseFee());

@@ -1,3 +1,4 @@
+// RecruiterController.java
 package com.example.controllers;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public class RecruiterController {
 
     @GetMapping("/{id}")
     public ResponseEntity<RecruiterResponse> getRecruiterById(
-            @PathVariable Integer id) {
+            @PathVariable("id") Integer id) {
 
         return ResponseEntity.ok(
                 recruiterService.getRecruiterById(id));
@@ -45,7 +46,7 @@ public class RecruiterController {
 
     @PutMapping("/{id}")
     public ResponseEntity<RecruiterResponse> updateRecruiter(
-            @PathVariable Integer id,
+            @PathVariable("id") Integer id,
             @RequestBody RecruiterRequest recruiterRequest) {
 
         return ResponseEntity.ok(
@@ -54,12 +55,12 @@ public class RecruiterController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteRecruiter(
-            @PathVariable Integer id) {
+    public ResponseEntity<Void> deleteRecruiter(
+            @PathVariable("id") Integer id) {
 
         recruiterService.deleteRecruiter(id);
 
-        return ResponseEntity.ok("Recruiter deleted successfully.");
+        return ResponseEntity.noContent().build();
     }
 
 }

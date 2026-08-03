@@ -2,51 +2,69 @@ package com.example.controllers;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.example.dto.PaymentRequestDTO;
-import com.example.dto.PaymentResponseDTO;
-import com.example.services.PaymentService;
+import com.example.dto.CreateOrderRequest;
+import com.example.dto.CreateOrderResponse;
+import com.example.dto.PaymentHistoryItemResponse;
+import com.example.dto.PaymentReceiptResponse;
+import com.example.dto.PaymentSummaryResponse;
+import com.example.dto.VerifyPaymentRequest;
+import com.example.services.RazorpayPaymentService;
+import com.razorpay.RazorpayException;
 
-//@RestController
+@RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
 
-    @Autowired
-    private PaymentService paymentService;
+    private final RazorpayPaymentService paymentService;
 
-    @PostMapping
-    public ResponseEntity<PaymentResponseDTO> createPayment(@RequestBody PaymentRequestDTO request) {
-        return new ResponseEntity<>(paymentService.createPayment(request), HttpStatus.CREATED);
+    public PaymentController(RazorpayPaymentService paymentService) {
+        this.paymentService = paymentService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<PaymentResponseDTO>> getAllPayments() {
-        return ResponseEntity.ok(paymentService.getAllPayments());
+    // Step 1: called when the admin submits a payment (first payment or a
+    // follow-up installment - see CreateOrderRequest.studentId). Creates a
+    // Razorpay order for a DB-verified amount.
+    @PostMapping("/create-order")
+    public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody CreateOrderRequest request)
+            throws RazorpayException {
+        return ResponseEntity.ok(paymentService.createOrder(request));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PaymentResponseDTO> getPaymentById(@PathVariable Integer id) {
-        return ResponseEntity.ok(paymentService.getPaymentById(id));
+    // Step 2: called by the frontend's Razorpay "handler" callback after
+    // checkout succeeds. Verifies the signature and persists everything.
+    @PostMapping("/verify")
+    public ResponseEntity<PaymentReceiptResponse> verify(@RequestBody VerifyPaymentRequest request) {
+        return ResponseEntity.ok(paymentService.verifyAndPersist(request));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<PaymentResponseDTO> updatePayment(
-            @PathVariable Integer id, @RequestBody PaymentRequestDTO request) {
-        return ResponseEntity.ok(paymentService.updatePayment(id, request));
+    // Cash / Bank payment - no gateway step involved. Works for both the
+    // first (admitting) payment and any later installment - see
+    // VerifyPaymentRequest.studentId.
+    @PostMapping("/offline")
+    public ResponseEntity<PaymentReceiptResponse> offline(@RequestBody VerifyPaymentRequest request) {
+        return ResponseEntity.ok(paymentService.recordOfflinePayment(request));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePayment(@PathVariable Integer id) {
-        paymentService.deletePayment(id);
-        return ResponseEntity.noContent().build();
+    // Live course-fee / paid / pending balance for one student - used to
+    // drive the installment UI (how much is left to collect).
+    @GetMapping("/summary/{studentId}")
+    public ResponseEntity<PaymentSummaryResponse> summary(@PathVariable Integer studentId) {
+        return ResponseEntity.ok(paymentService.getPaymentSummary(studentId));
     }
 
+    // Full payment/installment history for one student, oldest first,
+    // including Pending/Failed attempts and each row's receipt number and
+    // running remaining balance - powers the History tab.
     @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<PaymentResponseDTO>> getPaymentsByStudent(@PathVariable Integer studentId) {
-        return ResponseEntity.ok(paymentService.getPaymentsByStudent(studentId));
+    public ResponseEntity<List<PaymentHistoryItemResponse>> paymentHistory(@PathVariable Integer studentId) {
+        return ResponseEntity.ok(paymentService.getPaymentHistory(studentId));
     }
 }

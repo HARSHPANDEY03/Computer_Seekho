@@ -1,3 +1,4 @@
+// Staff.java
 package com.example.entities;
 
 import jakarta.persistence.*;
@@ -35,6 +36,9 @@ public class Staff {
 
     @Column(name = "staff_role", length = 50)
     private String staffRole;
+    
+    @Column(name = "description", length = 1000)
+    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -119,6 +123,14 @@ public class Staff {
 
     public void setStaffRole(String staffRole) {
         this.staffRole = staffRole;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public UserRole getUserRole() {

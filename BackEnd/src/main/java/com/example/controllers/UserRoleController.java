@@ -1,3 +1,4 @@
+// UserRoleController.java
 package com.example.controllers;
 
 import java.util.List;
@@ -19,7 +20,6 @@ public class UserRoleController {
         this.userRoleService = userRoleService;
     }
 
-    // Create Role
     @PostMapping
     public ResponseEntity<UserRole> createRole(
             @RequestBody UserRole userRole) {
@@ -32,7 +32,6 @@ public class UserRoleController {
                 HttpStatus.CREATED);
     }
 
-    // Get All Roles
     @GetMapping
     public ResponseEntity<List<UserRole>> getAllRoles() {
 
@@ -40,51 +39,45 @@ public class UserRoleController {
                 userRoleService.getAllRoles());
     }
 
-    // Get Role By ID
     @GetMapping("/{roleId}")
     public ResponseEntity<UserRole> getRoleById(
-            @PathVariable Integer roleId) {
+            @PathVariable("roleId") Integer roleId) {
 
         return ResponseEntity.ok(
                 userRoleService.getRoleById(roleId));
     }
 
-    // Update Role
     @PutMapping("/{roleId}")
     public ResponseEntity<UserRole> updateRole(
-            @PathVariable Integer roleId,
+            @PathVariable("roleId") Integer roleId,
             @RequestBody UserRole userRole) {
 
         return ResponseEntity.ok(
                 userRoleService.updateRole(roleId, userRole));
     }
 
-    // Activate Role
     @PatchMapping("/{roleId}/activate")
     public ResponseEntity<UserRole> activateRole(
-            @PathVariable Integer roleId) {
+            @PathVariable("roleId") Integer roleId) {
 
         return ResponseEntity.ok(
                 userRoleService.activateRole(roleId));
     }
 
-    // Deactivate Role
     @PatchMapping("/{roleId}/deactivate")
     public ResponseEntity<UserRole> deactivateRole(
-            @PathVariable Integer roleId) {
+            @PathVariable("roleId") Integer roleId) {
 
         return ResponseEntity.ok(
                 userRoleService.deactivateRole(roleId));
     }
 
-    // Delete Role
     @DeleteMapping("/{roleId}")
-    public ResponseEntity<String> deleteRole(
-            @PathVariable Integer roleId) {
+    public ResponseEntity<Void> deleteRole(
+            @PathVariable("roleId") Integer roleId) {
 
         userRoleService.deleteRole(roleId);
 
-        return ResponseEntity.ok(
-                "Role deleted successfully.");
+        return ResponseEntity.noContent().build();
     }
 }
