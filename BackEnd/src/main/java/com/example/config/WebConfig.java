@@ -1,7 +1,6 @@
-package com.example.demo.config;
+package com.example.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -20,12 +19,5 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/static/images/", imageDir);
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        // Allow React frontend (port 5173) to call Spring Boot APIs (port 8080)
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-                .allowedHeaders("*");
-    }
+    // CORS is now configured once, in CorsConfig, instead of here too.
 }

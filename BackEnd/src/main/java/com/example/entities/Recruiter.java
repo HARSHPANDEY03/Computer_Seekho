@@ -16,7 +16,13 @@ public class Recruiter {
     @Column(name = "recruiter_id", nullable = false)
     private Integer recruiterId;
 
-    @Column(name = "photo_url", length = 255)
+    /*
+     * photo_url
+     * Was VARCHAR(255) - widened to LONGTEXT so this can hold either a
+     * short hosted image URL (unchanged, existing behaviour) OR a
+     * base64 data: URL from the admin "Browse..." file picker.
+     */
+    @Column(name = "photo_url", columnDefinition = "LONGTEXT")
     private String photoUrl;
 
     @Column(name = "recruiter_name", length = 100)
