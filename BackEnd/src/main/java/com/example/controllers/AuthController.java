@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.dto.ChangePasswordRequest;
+import com.example.dto.GoogleLoginRequest;
 import com.example.dto.LoginRequest;
 import com.example.dto.LoginResponse;
 import com.example.services.AuthService;
@@ -26,6 +27,17 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
 
         LoginResponse response = authService.login(loginRequest);
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Staff Login with Google
+     */
+    @PostMapping("/google")
+    public ResponseEntity<LoginResponse> googleLogin(@RequestBody GoogleLoginRequest request) {
+
+        LoginResponse response = authService.loginWithGoogle(request);
 
         return ResponseEntity.ok(response);
     }

@@ -46,7 +46,8 @@ public class SecurityConfig {
 
                     // Public APIs
                     .requestMatchers(
-                            "/api/auth/login"
+                            "/api/auth/login",
+                            "/api/auth/google"
                     ).permitAll()
 
                     // Every other API requires authentication
