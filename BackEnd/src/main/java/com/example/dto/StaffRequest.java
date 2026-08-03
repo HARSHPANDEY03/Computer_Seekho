@@ -1,3 +1,4 @@
+// dto/StaffRequest.java
 package com.example.dto;
 
 public class StaffRequest {
@@ -9,6 +10,7 @@ public class StaffRequest {
     private String staffUsername;
     private String staffPassword;
     private String staffRole;
+    private String description;
     private Integer userRoleId;
 
     // Default Constructor
@@ -86,6 +88,14 @@ public class StaffRequest {
 
     public void setStaffRole(String staffRole) {
         this.staffRole = staffRole;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Integer getUserRoleId() {

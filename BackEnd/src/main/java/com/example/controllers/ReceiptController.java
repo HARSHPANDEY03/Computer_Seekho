@@ -1,3 +1,4 @@
+// ReceiptController.java
 package com.example.controllers;
 
 
@@ -23,24 +24,15 @@ public class ReceiptController {
         this.receiptService = receiptService;
     }
 
-    /**
-     * Called when the user presses "View Receipt" on the frontend.
-     * GET /api/receipts/{receiptId}
-     */
     @GetMapping("/{receiptId}")
-    public ResponseEntity<Receipt> getReceiptById(@PathVariable Integer receiptId) {
+    public ResponseEntity<Receipt> getReceiptById(@PathVariable("receiptId") Integer receiptId) {
         Receipt receipt = receiptService.getReceiptById(receiptId);
         return ResponseEntity.ok(receipt);
     }
 
-    /**
-     * Fetches all receipts for a student whose name matches (partial,
-     * case-insensitive) the given text.
-     * GET /api/receipts/search?studentName=John
-     */
     @GetMapping("/search")
     public ResponseEntity<List<Receipt>> getReceiptsByStudentName(
-            @RequestParam String studentName) {
+            @RequestParam("studentName") String studentName) {
         List<Receipt> receipts = receiptService.getReceiptsByStudentName(studentName);
         return ResponseEntity.ok(receipts);
     }

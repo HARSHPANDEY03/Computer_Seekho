@@ -1,3 +1,4 @@
+// services/StaffServiceImpl.java
 package com.example.services;
 
 import java.util.List;
@@ -29,14 +30,9 @@ public class StaffServiceImpl implements StaffService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // =====================================================
-    // CREATE STAFF
-    // =====================================================
-
     @Override
     public StaffResponse createStaff(StaffRequest request) {
 
-        // Check duplicate username
         if (staffRepository.existsByStaffUsername(
                 request.getStaffUsername())) {
 
@@ -44,7 +40,6 @@ public class StaffServiceImpl implements StaffService {
                     "Staff username already exists.");
         }
 
-        // Check duplicate email
         if (staffRepository.existsByStaffEmail(
                 request.getStaffEmail())) {
 
@@ -52,7 +47,6 @@ public class StaffServiceImpl implements StaffService {
                     "Staff email already exists.");
         }
 
-        // Find Role
         UserRole userRole = userRoleRepository
                 .findById(request.getUserRoleId())
                 .orElseThrow(() ->
@@ -70,23 +64,14 @@ public class StaffServiceImpl implements StaffService {
 
         staff.setStaffEmail(request.getStaffEmail());
 
+        staff.setDescription(request.getDescription());
+
         staff.setStaffUsername(request.getStaffUsername());
 
-        // Encode password
         staff.setStaffPassword(
                 passwordEncoder.encode(
                         request.getStaffPassword()));
 
-        /*
-         * Get the role name from UserRole.
-         *
-         * Example:
-         *
-         * userRoleId = 1
-         * roleName = ADMIN
-         *
-         * This prevents conflicting role information.
-         */
         staff.setStaffRole(userRole.getRoleName());
 
         staff.setUserRole(userRole);
@@ -97,10 +82,6 @@ public class StaffServiceImpl implements StaffService {
         return convertToResponse(savedStaff);
     }
 
-    // =====================================================
-    // GET ALL STAFF
-    // =====================================================
-
     @Override
     public List<StaffResponse> getAllStaff() {
 
@@ -110,10 +91,6 @@ public class StaffServiceImpl implements StaffService {
                 .map(this::convertToResponse)
                 .toList();
     }
-
-    // =====================================================
-    // GET STAFF BY ID
-    // =====================================================
 
     @Override
     public StaffResponse getStaffById(Integer staffId) {
@@ -128,10 +105,6 @@ public class StaffServiceImpl implements StaffService {
         return convertToResponse(staff);
     }
 
-    // =====================================================
-    // UPDATE STAFF
-    // =====================================================
-
     @Override
     public StaffResponse updateStaff(
             Integer staffId,
@@ -144,7 +117,6 @@ public class StaffServiceImpl implements StaffService {
                                 "Staff not found with ID: "
                                         + staffId));
 
-        // Check username duplication
         if (!staff.getStaffUsername()
                 .equals(request.getStaffUsername())
                 &&
@@ -155,7 +127,6 @@ public class StaffServiceImpl implements StaffService {
                     "Staff username already exists.");
         }
 
-        // Check email duplication
         if (!staff.getStaffEmail()
                 .equals(request.getStaffEmail())
                 &&
@@ -185,6 +156,9 @@ public class StaffServiceImpl implements StaffService {
         staff.setStaffEmail(
                 request.getStaffEmail());
 
+        staff.setDescription(
+                request.getDescription());
+
         staff.setStaffUsername(
                 request.getStaffUsername());
 
@@ -193,23 +167,11 @@ public class StaffServiceImpl implements StaffService {
 
         staff.setUserRole(userRole);
 
-        /*
-         * Password is NOT updated here.
-         *
-         * Password changes are handled by:
-         *
-         * AuthService.changePassword()
-         */
-
         Staff updatedStaff =
                 staffRepository.save(staff);
 
         return convertToResponse(updatedStaff);
     }
-
-    // =====================================================
-    // DELETE STAFF
-    // =====================================================
 
     @Override
     public void deleteStaff(Integer staffId) {
@@ -224,10 +186,6 @@ public class StaffServiceImpl implements StaffService {
         staffRepository.delete(staff);
     }
 
-    // =====================================================
-    // SEARCH STAFF
-    // =====================================================
-
     @Override
     public List<StaffResponse> searchStaffByName(
             String staffName) {
@@ -239,10 +197,6 @@ public class StaffServiceImpl implements StaffService {
                 .map(this::convertToResponse)
                 .toList();
     }
-
-    // =====================================================
-    // ENTITY -> RESPONSE DTO
-    // =====================================================
 
     private StaffResponse convertToResponse(
             Staff staff) {
@@ -264,6 +218,9 @@ public class StaffServiceImpl implements StaffService {
 
         response.setStaffEmail(
                 staff.getStaffEmail());
+
+        response.setDescription(
+                staff.getDescription());
 
         response.setStaffUsername(
                 staff.getStaffUsername());

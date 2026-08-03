@@ -37,4 +37,11 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Integer> {
             "LEFT JOIN FETCH r.course " +
             "WHERE LOWER(s.studentName) LIKE LOWER(CONCAT('%', :studentName, '%'))")
     List<Receipt> findReceiptsWithDetailsByStudentName(@Param("studentName") String studentName);
+
+    /**
+     * Used by the Razorpay verification flow to idempotently return the
+     * existing receipt when a browser retries a /verify call for an order
+     * that has already been marked PAID.
+     */
+    Optional<Receipt> findByPayment_PaymentId(Integer paymentId);
 }

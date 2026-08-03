@@ -1,3 +1,4 @@
+// ContactController.java
 package com.example.controllers;
 
 import java.util.List;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.http.ResponseEntity;
 
 import com.example.dto.ContactRequest;
 import com.example.dto.ContactResponse;
@@ -29,7 +32,7 @@ public class ContactController {
     }
 
     @GetMapping("/{id}")
-    public ContactResponse getContactById(@PathVariable int id) {
+    public ContactResponse getContactById(@PathVariable("id") int id) {
         return contactService.getContactById(id);
     }
 
@@ -39,14 +42,14 @@ public class ContactController {
     }
 
     @PutMapping("/{id}")
-    public ContactResponse updateContact(@PathVariable int id,
+    public ContactResponse updateContact(@PathVariable("id") int id,
                                          @RequestBody ContactRequest contactRequest) {
         return contactService.updateContact(id, contactRequest);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteContact(@PathVariable int id) {
+    public ResponseEntity<Void> deleteContact(@PathVariable("id") int id) {
         contactService.deleteContact(id);
-        return "Contact deleted successfully.";
+        return ResponseEntity.noContent().build();
     }
 }

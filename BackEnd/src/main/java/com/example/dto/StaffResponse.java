@@ -1,3 +1,4 @@
+// dto/StaffResponse.java
 package com.example.dto;
 
 public class StaffResponse {
@@ -9,6 +10,7 @@ public class StaffResponse {
     private String staffEmail;
     private String staffUsername;
     private String staffRole;
+    private String description;
     private Integer userRoleId;
     private String roleName;
 
@@ -93,6 +95,14 @@ public class StaffResponse {
 
     public void setStaffRole(String staffRole) {
         this.staffRole = staffRole;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Integer getUserRoleId() {
