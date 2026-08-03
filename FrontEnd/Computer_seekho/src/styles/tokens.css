@@ -1,0 +1,112 @@
+/*
+  Design tokens — Computer Seekho / VITA
+
+  Direction: "Teal & Coral" — a warm, energetic institutional palette.
+  Deep teal carries trust and authority (used for headers, sidebar, footer,
+  buttons) while coral is the achievement/CTA accent (certificates, medals,
+  placement success, highlights). Both are kept at medium saturation and
+  lightness on purpose: no near-black surfaces, no pastel/washed-out tints —
+  every "dark" surface reads as a rich, distinct color, not gray-black.
+
+  Change a value here and it propagates everywhere. No hardcoded colors,
+  font names, spacing or radius values belong in component files.
+*/
+
+:root {
+  /* ---- Color: ink (deep teal — dark surfaces: header, sidebar, footer) ---- */
+  --ink-900: #0F766E;
+  --ink-800: #159086;
+  --ink-700: #1AA79B;
+  --ink-600: #21BEB0;
+
+  /* ---- Color: teal (interactive) ---- */
+  --blue-700: #0D9488;
+  --blue-600: #14B8A6;
+  --blue-500: #2DD4BF;
+  --blue-100: #CCFBF1;
+  --blue-50: #F0FDFA;
+
+  /* ---- Color: coral (accent / achievement) ---- */
+  --brass-700: #C2451F;
+  --brass-600: #E85C34;
+  --brass-500: #FF7F50;
+  --brass-100: #FFE1D3;
+  --brass-50: #FFF1EA;
+
+  /* ---- Color: paper (soft neutral, faint teal tint) ---- */
+  --paper-100: #E7F2F0;
+  --paper-50: #F2F9F8;
+  --white: #FFFFFF;
+
+  /* ---- Color: status ---- */
+  --ok-600: #1E8E6C;
+  --ok-100: #DDF3E7;
+  --danger-600: #D64545;
+  --danger-100: #FBE1E1;
+  --warn-600: #D97F2B;
+  --warn-100: #FBEBD8;
+
+  /* ---- Color: text ---- */
+  --text-primary: #12312D;
+  --text-secondary: #4B6B66;
+  --text-tertiary: #7C9D97;
+  --text-on-dark: #FFFFFF;
+  --text-on-dark-muted: #CFEEE9;
+  --text-on-dark-faint: #9FCEC5;
+
+  /* ---- Color: borders ---- */
+  --border-subtle: #E1EEEC;
+  --border-default: #C4DAD6;
+  --border-on-dark: rgba(255, 255, 255, 0.18);
+
+  /* ---- Type families ---- */
+  --font-display: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-serif: "IBM Plex Serif", Georgia, serif;
+
+  /* ---- Type scale ---- */
+  --text-xs: 0.75rem;      /* 12px — micro labels */
+  --text-sm: 0.8125rem;    /* 13px — captions, table meta */
+  --text-md: 0.9375rem;    /* 15px — UI text, inputs, table cells */
+  --text-base: 1rem;       /* 16px — body copy */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 1.875rem;    /* 30px */
+  --text-4xl: 2.375rem;    /* 38px */
+  --text-5xl: 3rem;        /* 48px */
+  --text-6xl: 3.75rem;     /* 60px */
+
+  /* ---- Spacing scale ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  /* ---- Radius ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+  --radius-arch: 999px 999px 10px 10px; /* signature: arch-top echo on select cards only */
+
+  /* ---- Shadow ---- */
+  --shadow-sm: 0 1px 2px rgba(15, 118, 110, 0.10);
+  --shadow-md: 0 6px 20px rgba(15, 118, 110, 0.12);
+  --shadow-lg: 0 20px 48px rgba(15, 118, 110, 0.20);
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --fast: 150ms;
+  --med: 240ms;
+
+  /* ---- Layout ---- */
+  --max-width: 1200px;
+  --admin-sidebar-width: 248px;
+}
