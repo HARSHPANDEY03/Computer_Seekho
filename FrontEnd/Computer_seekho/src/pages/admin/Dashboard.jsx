@@ -2,9 +2,12 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getDashboardSummary } from '../../api/misc';
-import { getTodayForStaff, getOverdueForStaff } from '../../api/enquiries';
+import { getTodayForStaff, getOverdueForStaff, createEnquiry } from '../../api/enquiries';
 import { Loading, EmptyState } from '../../components/ui/ui';
 import { extractProgramInterest } from '../../utils/enquiry';
+import { registerStudent } from '../../api/students';
+import { getActiveCourses, getActiveBatchesByCourse } from '../../api/courses';
+
 
 export default function Dashboard() {
   const { staff } = useAuth();

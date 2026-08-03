@@ -5,21 +5,26 @@ import * as coursesApi from '../../api/courses';
 import * as staffApi from '../../api/staff';
 import * as contentApi from '../../api/content';
 import * as enquiriesApi from '../../api/enquiries';
+import * as studentsApi from '../../api/students';
+import * as miscApi from '../../api/misc';
 
-const TABS = ['Courses', 'Batches', 'Staff', 'Recruiters', 'Albums', 'Images', 'Announcements', 'Payment Types', 'Closure Reasons'];
-
+const TABS = ['Courses', 'Batches', 'Staff', 'Students', 'Recruiters', 'Placements', 'Albums', 'Images', 'Announcements', 'Payment Types', 'Closure Reasons'];
 
 export default function Content() {
   const [tab, setTab] = useState('Courses');
   const [courses, setCourses] = useState(null);
+  const [batches, setBatches] = useState(null);
+  const [recruiters, setRecruiters] = useState(null);
   const [albums, setAlbums] = useState(null);
 
   useEffect(() => {
     coursesApi.getAllCourses().then(setCourses).catch(() => setCourses([]));
+    coursesApi.getAllBatches().then(setBatches).catch(() => setBatches([]));
+    contentApi.getAllRecruiters().then(setRecruiters).catch(() => setRecruiters([]));
     contentApi.getAllAlbums().then(setAlbums).catch(() => setAlbums([]));
   }, []);
 
-  if (courses === null || albums === null) return <Loading label="Loading content manager…" />;
+  if (courses === null || batches === null || recruiters === null || albums === null) return <Loading label="Loading content manager…" />;
 
   return (
     <div>
@@ -39,7 +44,9 @@ export default function Content() {
       {tab === 'Courses' && <ResourceTab config={coursesConfig()} />}
       {tab === 'Batches' && <ResourceTab config={batchesConfig(courses)} />}
       {tab === 'Staff' && <ResourceTab config={staffConfig()} />}
+      {tab === 'Students' && <ResourceTab config={studentsConfig(courses, batches)} />}
       {tab === 'Recruiters' && <ResourceTab config={recruitersConfig()} />}
+      {tab === 'Placements' && <ResourceTab config={placementsConfig(batches, recruiters)} />}
       {tab === 'Albums' && <ResourceTab config={albumsConfig()} />}
       {tab === 'Images' && <ResourceTab config={imagesConfig(albums)} />}
       {tab === 'Announcements' && <ResourceTab config={announcementsConfig()} />}
@@ -65,7 +72,7 @@ function coursesConfig() {
     columns: [
       { key: 'courseName', label: 'Course' },
       { key: 'courseCategory', label: 'Category' },
-      { key: 'ageGrpType', label: 'Type' },
+      { key: 'ageGrpType', label: 'Age Group' },
       { key: 'courseDuration', label: 'Duration', render: (i) => (i.courseDuration ? `${i.courseDuration} mo` : '—') },
       { key: 'courseFees', label: 'Fees', render: (i) => money(i.courseFees) },
       { key: 'courseIsActive', label: 'Status' },
@@ -73,12 +80,12 @@ function coursesConfig() {
     fields: [
       { key: 'courseName', label: 'Course name', type: 'text', required: true },
       { key: 'courseCategory', label: 'Category', type: 'text', required: true },
-      { key: 'ageGrpType', label: 'Type', type: 'select', options: [{ value: 'PG Diploma', label: 'PG Diploma' }, { value: 'Certification', label: 'Certification' }, { value: 'Short-term', label: 'Short-term' }] },
+      { key: 'ageGrpType', label: 'Age Group', type: 'select', options: [{ value: 'School students', label: 'School students' }, { value: 'College students', label: 'College students' }, { value: 'Professionals', label: 'Professionals' }] },
       { key: 'courseDuration', label: 'Duration (months)', type: 'number' },
       { key: 'courseFees', label: 'Fees (INR)', type: 'number' },
       { key: 'courseFeesFrom', label: 'Fee valid from', type: 'date' },
       { key: 'courseFeesTo', label: 'Fee valid to', type: 'date' },
-      { key: 'coverPhoto', label: 'Cover photo URL', type: 'text' },
+      { key: 'coverPhoto', label: 'Cover Photo', type: 'photo' },
       { key: 'courseDescription', label: 'Description', type: 'textarea' },
       { key: 'courseSyllabus', label: 'Syllabus (one point per line)', type: 'textarea' },
       { key: 'isFeatured', label: 'Featured on homepage', type: 'checkbox' },
@@ -138,7 +145,7 @@ function staffConfig() {
       { key: 'staffRole', label: 'Role / designation', type: 'text' },
       { key: 'staffMobile', label: 'Mobile', type: 'text' },
       { key: 'staffEmail', label: 'Email', type: 'text' },
-      { key: 'photoUrl', label: 'Photo URL', type: 'text' },
+      { key: 'photoUrl', label: 'Photo', type: 'photo' },
       { key: 'description', label: 'Bio / description', type: 'textarea' },
       { key: 'staffUsername', label: 'Login username', type: 'text', required: true },
       { key: 'staffPassword', label: 'Password (leave blank to keep unchanged)', type: 'password' },
@@ -150,6 +157,66 @@ function staffConfig() {
       return staffPassword ? { ...rest, staffPassword } : rest;
     },
     emptyForm: { staffName: '', staffRole: '', staffMobile: '', staffEmail: '', photoUrl: '', description: '', staffUsername: '', staffPassword: '' },
+  };
+}
+
+// Students are only ever created through the Admissions flow (they require
+// an enquiry, a course, a batch and a first payment together) - this tab is
+// for viewing and editing already-admitted students, not creating new ones.
+// canCreate is false, so api.create is never called and isn't provided.
+//
+// The backend's PUT /api/students/{id} reuses the same StudentRequest DTO
+// as registration, which has @NotNull on enquiryId - so toPayload below
+// must carry the student's existing enquiryId through unchanged, even
+// though it isn't user-editable, or every save would fail validation.
+function studentsConfig(courses, batches) {
+  const courseOptions = courses.map((c) => ({ value: c.courseId, label: c.courseName }));
+  const courseName = (id) => courses.find((c) => c.courseId === id)?.courseName;
+  // Batch options aren't filtered live by the course field in this simple
+  // form framework, so the course name is included in each label to keep
+  // them identifiable regardless of which course is currently selected.
+  const batchOptions = batches.map((b) => ({ value: b.batchId, label: `${b.batchName} — ${courseName(b.courseId) || 'Unknown course'}` }));
+
+  return {
+    idKey: 'studentId',
+    title: 'Students',
+    singular: 'Student',
+    searchKeys: ['studentName', 'studentMobile', 'studentEmail', 'courseName', 'batchName'],
+    filters: [{ key: 'courseId', label: 'Courses', options: courseOptions }],
+    columns: [
+      { key: 'studentName', label: 'Name' },
+      { key: 'studentMobile', label: 'Mobile' },
+      { key: 'studentEmail', label: 'Email' },
+      { key: 'courseName', label: 'Course' },
+      { key: 'batchName', label: 'Batch' },
+      { key: 'courseFee', label: 'Course Fee', render: (i) => money(i.courseFee) },
+    ],
+    fields: [
+      { key: 'studentName', label: 'Student name', type: 'text', required: true },
+      { key: 'studentMobile', label: 'Mobile', type: 'text', required: true },
+      { key: 'studentEmail', label: 'Email', type: 'text' },
+      { key: 'studentDob', label: 'Date of birth', type: 'date' },
+      { key: 'studentGender', label: 'Gender', type: 'select', options: [{ value: 'Male', label: 'Male' }, { value: 'Female', label: 'Female' }, { value: 'Other', label: 'Other' }] },
+      { key: 'studentQualification', label: 'Qualification', type: 'text' },
+      { key: 'studentAddress', label: 'Address', type: 'textarea' },
+      { key: 'courseId', label: 'Course', type: 'select', required: true, options: courseOptions },
+      { key: 'batchId', label: 'Batch', type: 'select', required: true, options: batchOptions },
+      { key: 'courseFee', label: 'Course fee (INR)', type: 'number' },
+      { key: 'photoUrl', label: 'Photo', type: 'photo' },
+    ],
+    api: { list: studentsApi.getAllStudents, update: studentsApi.updateStudent },
+    canCreate: false, // students are admitted via the Admissions page, not created here
+    canDelete: false, // no DELETE endpoint exists for students on the backend
+    toForm: (s) => ({ ...s }),
+    toPayload: (f) => ({
+      ...f,
+      enquiryId: f.enquiryId, // required by the backend's shared StudentRequest DTO, not user-editable here
+      courseId: Number(f.courseId),
+      batchId: Number(f.batchId),
+      courseFee: f.courseFee ? Number(f.courseFee) : null,
+      studentMobile: f.studentMobile ? Number(f.studentMobile) : null,
+    }),
+    emptyForm: {},
   };
 }
 
@@ -165,13 +232,51 @@ function recruitersConfig() {
     ],
     fields: [
       { key: 'recruiterName', label: 'Recruiter name', type: 'text', required: true },
-      { key: 'photoUrl', label: 'Logo URL', type: 'text' },
+      { key: 'photoUrl', label: 'Logo', type: 'photo' },
       { key: 'description', label: 'Notes', type: 'textarea' },
     ],
     api: { list: contentApi.getAllRecruiters, create: contentApi.createRecruiter, update: contentApi.updateRecruiter, remove: contentApi.deleteRecruiter },
     toForm: (r) => ({ ...r }),
     toPayload: (f) => f,
     emptyForm: { recruiterName: '', photoUrl: '', description: '' },
+  };
+}
+
+// This was previously entirely missing from the admin panel, even though
+// the backend's PlacementController already supports full CRUD - nothing
+// here was ever wired up, which is why the public Placements page always
+// showed "No placements published yet" with nothing to add one.
+function placementsConfig(batches, recruiters) {
+  const batchOptions = batches.map((b) => ({ value: b.batchId, label: `${b.batchName} — ${b.courseName || 'Unknown course'}` }));
+  const recruiterOptions = recruiters.map((r) => ({ value: r.recruiterId, label: r.recruiterName }));
+
+  return {
+    idKey: 'placedStudentId',
+    title: 'Placements',
+    singular: 'Placement',
+    searchKeys: ['placedStudentName', 'recruiterName', 'batchName'],
+    filters: [{ key: 'batchId', label: 'Batches', options: batchOptions }],
+    columns: [
+      { key: 'placedStudentName', label: 'Student' },
+      { key: 'batchName', label: 'Batch' },
+      { key: 'recruiterName', label: 'Recruiter' },
+      { key: 'placementPackage', label: 'Package', render: (i) => money(i.placementPackage) },
+    ],
+    fields: [
+      { key: 'placedStudentName', label: 'Placed student name', type: 'text', required: true },
+      { key: 'batchId', label: 'Batch', type: 'select', required: true, options: batchOptions },
+      { key: 'recruiterId', label: 'Recruiter', type: 'select', required: true, options: recruiterOptions },
+      { key: 'placementPackage', label: 'Package (INR per annum)', type: 'number' },
+    ],
+    api: { list: miscApi.getAllPlacements, create: miscApi.createPlacement, update: miscApi.updatePlacement, remove: miscApi.deletePlacement },
+    toForm: (p) => ({ ...p }),
+    toPayload: (f) => ({
+      placedStudentName: f.placedStudentName,
+      batchId: Number(f.batchId),
+      recruiterId: Number(f.recruiterId),
+      placementPackage: f.placementPackage ? Number(f.placementPackage) : null,
+    }),
+    emptyForm: { placedStudentName: '', batchId: '', recruiterId: '', placementPackage: '' },
   };
 }
 
@@ -224,7 +329,7 @@ function imagesConfig(albums) {
       { key: 'imageIsActive', label: 'Status' },
     ],
     fields: [
-      { key: 'imagePath', label: 'Image URL', type: 'text', required: true },
+      { key: 'imagePath', label: 'Image', type: 'photo', required: true },
       { key: 'albumId', label: 'Album', type: 'select', required: true, options: albumOptions },
       { key: 'isAlbumCover', label: 'Use as album cover', type: 'checkbox' },
       { key: 'imageIsActive', label: 'Active (shown on public site)', type: 'checkbox' },
