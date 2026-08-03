@@ -1,3 +1,4 @@
+// StudentController.java
 package com.example.controllers;
 
 import java.util.List;
@@ -25,13 +26,10 @@ public class StudentController {
 
     private final StudentService studentService;
 
-    // Constructor injection
     public StudentController(StudentService studentService) {
         this.studentService = studentService;
     }
 
-    // Register a new student
-    // POST: http://localhost:8080/api/students/register
     @PostMapping("/register")
     public ResponseEntity<StudentResponse> registerStudent(
             @Valid @RequestBody StudentRequest request) {
@@ -44,8 +42,6 @@ public class StudentController {
                 .body(response);
     }
 
-    // Get all students
-    // GET: http://localhost:8080/api/students
     @GetMapping
     public ResponseEntity<List<StudentResponse>> getAllStudents() {
 
@@ -55,11 +51,9 @@ public class StudentController {
         return ResponseEntity.ok(students);
     }
 
-    // Get student using student ID
-    // GET: http://localhost:8080/api/students/1
     @GetMapping("/{studentId}")
     public ResponseEntity<StudentResponse> getStudentById(
-            @PathVariable Integer studentId) {
+            @PathVariable("studentId") Integer studentId) {
 
         StudentResponse response =
                 studentService.getStudentById(studentId);
@@ -67,11 +61,9 @@ public class StudentController {
         return ResponseEntity.ok(response);
     }
 
-    // Get student using enquiry ID
-    // GET: http://localhost:8080/api/students/enquiry/1
     @GetMapping("/enquiry/{enquiryId}")
     public ResponseEntity<StudentResponse> getStudentByEnquiryId(
-            @PathVariable Integer enquiryId) {
+            @PathVariable("enquiryId") Integer enquiryId) {
 
         StudentResponse response =
                 studentService.getStudentByEnquiryId(enquiryId);
@@ -79,27 +71,26 @@ public class StudentController {
         return ResponseEntity.ok(response);
     }
 
-    // Search students using name, mobile, or both
-    //
-    // GET: /api/students/search?name=Vaishnavi
-    // GET: /api/students/search?mobile=9876543210
-    // GET: /api/students/search?name=Vaishnavi&mobile=9876543210
+    // studentId / admissionId are exact-match lookups (unambiguous IDs);
+    // name / mobile remain partial/exact matches as before. Any
+    // combination of query params is accepted - studentId and admissionId
+    // just take priority when present.
     @GetMapping("/search")
     public ResponseEntity<List<StudentResponse>> searchStudents(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) Long mobile) {
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "mobile", required = false) Long mobile,
+            @RequestParam(value = "studentId", required = false) Integer studentId,
+            @RequestParam(value = "admissionId", required = false) Integer admissionId) {
 
         List<StudentResponse> students =
-                studentService.searchStudents(name, mobile);
+                studentService.searchStudents(name, mobile, studentId, admissionId);
 
         return ResponseEntity.ok(students);
     }
 
-    // Update an existing student
-    // PUT: http://localhost:8080/api/students/1
     @PutMapping("/{studentId}")
     public ResponseEntity<StudentResponse> updateStudent(
-            @PathVariable Integer studentId,
+            @PathVariable("studentId") Integer studentId,
             @Valid @RequestBody StudentRequest request) {
 
         StudentResponse response =

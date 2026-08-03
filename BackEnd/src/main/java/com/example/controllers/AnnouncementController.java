@@ -1,8 +1,10 @@
+// AnnouncementController.java
 package com.example.controllers;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +31,7 @@ public class AnnouncementController {
     }
 
     @GetMapping("/{id}")
-    public AnnouncementResponse getAnnouncementById(@PathVariable int id) {
+    public AnnouncementResponse getAnnouncementById(@PathVariable("id") int id) {
         return announcementService.getAnnouncementById(id);
     }
 
@@ -42,15 +44,15 @@ public class AnnouncementController {
 
     @PutMapping("/{id}")
     public AnnouncementResponse updateAnnouncement(
-            @PathVariable int id,
+            @PathVariable("id") int id,
             @RequestBody AnnouncementRequest announcementRequest) {
 
         return announcementService.updateAnnouncement(id, announcementRequest);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteAnnouncement(@PathVariable int id) {
+    public ResponseEntity<Void> deleteAnnouncement(@PathVariable("id") int id) {
         announcementService.deleteAnnouncement(id);
-        return "Announcement deleted successfully.";
+        return ResponseEntity.noContent().build();
     }
 }

@@ -33,6 +33,9 @@ public class StudentRequest {
 
     private Long studentMobile;
 
+    @Size(max = 150)
+    private String studentEmail;
+
     private BigDecimal courseFee;
 
     @NotNull(message = "Batch ID is required")
@@ -111,6 +114,14 @@ public class StudentRequest {
 
     public void setStudentMobile(Long studentMobile) {
         this.studentMobile = studentMobile;
+    }
+
+    public String getStudentEmail() {
+        return studentEmail;
+    }
+
+    public void setStudentEmail(String studentEmail) {
+        this.studentEmail = studentEmail;
     }
 
     public BigDecimal getCourseFee() {

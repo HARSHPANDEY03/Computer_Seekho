@@ -1,3 +1,4 @@
+// ImageController.java
 package com.example.controllers;
 
 import java.util.List;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.http.ResponseEntity;
 
 import com.example.dto.ImageRequest;
 import com.example.dto.ImageResponse;
@@ -29,7 +32,7 @@ public class ImageController {
     }
 
     @GetMapping("/{id}")
-    public ImageResponse getImageById(@PathVariable int id) {
+    public ImageResponse getImageById(@PathVariable("id") int id) {
         return imageService.getImageById(id);
     }
 
@@ -39,14 +42,14 @@ public class ImageController {
     }
 
     @PutMapping("/{id}")
-    public ImageResponse updateImage(@PathVariable int id,
+    public ImageResponse updateImage(@PathVariable("id") int id,
                                      @RequestBody ImageRequest imageRequest) {
         return imageService.updateImage(id, imageRequest);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteImage(@PathVariable int id) {
+    public ResponseEntity<Void> deleteImage(@PathVariable("id") int id) {
         imageService.deleteImage(id);
-        return "Image deleted successfully.";
+        return ResponseEntity.noContent().build();
     }
 }

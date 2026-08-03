@@ -69,6 +69,42 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    /**
+     * Course/batch/order/payment-type not found while processing a
+     * Razorpay order or verification request.
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleResourceNotFound(
+            ResourceNotFoundException exception) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("success", false);
+        response.put("message", exception.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(response);
+    }
+
+    /**
+     * The Razorpay signature could not be verified - the payment cannot be
+     * trusted, so nothing was persisted.
+     */
+    @ExceptionHandler(PaymentVerificationException.class)
+    public ResponseEntity<Map<String, Object>> handlePaymentVerification(
+            PaymentVerificationException exception) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("success", false);
+        response.put("message", exception.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(response);
+    }
+
     @ExceptionHandler(DuplicateAdmissionException.class)
     public ResponseEntity<Map<String, Object>> handleDuplicateAdmission(
             DuplicateAdmissionException exception) {
