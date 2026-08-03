@@ -22,4 +22,12 @@ public interface EnquiryRepository extends JpaRepository<Enquiry, Integer> {
 
 	@Query("SELECT e FROM Enquiry e WHERE e.staff.staffId = :staffId AND e.followupDate < :today AND e.enquiryProcessedFlag = false")
 	List<Enquiry> findOverdueForStaff(@Param("staffId") Integer staffId, @Param("today") LocalDate today);
+
+	// "Open" = not yet processed - i.e. neither registered (admitted) nor
+	// closed (marked not-joining). Matches the frontend's deriveEnquiryStatus:
+	// enquiryProcessedFlag only gets set true once an enquiry is admitted or
+	// explicitly closed, so everything else (new/contacted/follow-up-due)
+	// counts as still open.
+	@Query("SELECT COUNT(e) FROM Enquiry e WHERE e.enquiryProcessedFlag IS NULL OR e.enquiryProcessedFlag = false")
+	Long countOpen();
 }

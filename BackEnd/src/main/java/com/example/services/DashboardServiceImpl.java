@@ -34,8 +34,12 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public DashboardSummaryResponse getDashboardSummary() {
 
-        // 1. Total Enquiries
-        Long totalEnquiries = enquiryRepository.count();
+        // 1. Open Enquiries
+        // Previously enquiryRepository.count() - the count of EVERY enquiry
+        // ever created, closed or admitted included, despite the dashboard
+        // card being labeled "Open enquiries". Fixed to actually count only
+        // unprocessed (still-open) enquiries.
+        Long totalEnquiries = enquiryRepository.countOpen();
 
         // 2. Today's Follow-ups
         LocalDate today = LocalDate.now();

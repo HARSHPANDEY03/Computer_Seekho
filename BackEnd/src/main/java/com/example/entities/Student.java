@@ -75,9 +75,13 @@ public class Student {
 
     /*
      * photo_url
-     * VARCHAR(255)
+     * Was VARCHAR(255) - widened to LONGTEXT so this can hold either a
+     * short hosted image URL (unchanged, existing behaviour) OR a
+     * base64 data: URL from the admin "Browse..." file picker, which
+     * this project has no separate file-storage backend for. A varchar(255)
+     * cannot hold even a small embedded image's base64 text.
      */
-    @Column(name = "photo_url", length = 255)
+    @Column(name = "photo_url", columnDefinition = "LONGTEXT")
     private String photoUrl;
 
     /*
