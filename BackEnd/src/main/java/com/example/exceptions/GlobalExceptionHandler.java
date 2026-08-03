@@ -3,6 +3,7 @@ package com.example.exceptions;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -33,6 +34,51 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
+                .body(response);
+    }
+
+    /**
+     * Any database-level rule violation: deleting a row something else
+     * still references (foreign key), saving a value too long for its
+     * column, a duplicate value on a unique column, etc. Spring wraps all
+     * of these in DataIntegrityViolationException, and its default message
+     * is the raw JDBC/SQL error - including the full failing statement,
+     * which is meaningless (and slightly alarming) to an end user. This
+     * handler is picked over the generic RuntimeException one below
+     * automatically, since Spring always matches the most specific
+     * exception type first - translate it into one clean, genuine sentence
+     * instead of leaking that SQL text to the browser.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(
+            DataIntegrityViolationException exception) {
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", false);
+
+        Throwable mostSpecific = exception.getMostSpecificCause();
+        String raw = mostSpecific != null ? mostSpecific.getMessage() : exception.getMessage();
+        String lower = raw != null ? raw.toLowerCase() : "";
+
+        String friendly;
+        if (lower.contains("foreign key constraint fails") && lower.contains("delete")) {
+            friendly = "This can't be deleted because other records still depend on it. "
+                    + "Remove or reassign those related records first, then try again.";
+        } else if (lower.contains("foreign key constraint fails")) {
+            friendly = "This couldn't be saved because it references something that no longer exists. "
+                    + "Please double-check the related selection and try again.";
+        } else if (lower.contains("data too long") || lower.contains("data truncation")) {
+            friendly = "One of the values entered is too long to be saved. Please shorten it and try again.";
+        } else if (lower.contains("duplicate entry")) {
+            friendly = "A record with this value already exists. Please use a different value.";
+        } else {
+            friendly = "This couldn't be saved due to a data conflict. Please check the values and try again.";
+        }
+
+        response.put("message", friendly);
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
                 .body(response);
     }
 
