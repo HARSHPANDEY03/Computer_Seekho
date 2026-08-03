@@ -1,9 +1,10 @@
-package com.example.demo.config;
+package com.example.config;
 
-import com.example.demo.entities.Batch;
-import com.example.demo.entities.Course;
-import com.example.demo.repository.BatchRepository;
-import com.example.demo.repository.CourseRepository;
+import com.example.entities.Batch;
+import com.example.entities.Course;
+import com.example.repositories.BatchRepository;
+import com.example.repositories.CourseRepository;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
