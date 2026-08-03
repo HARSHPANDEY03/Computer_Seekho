@@ -32,6 +32,20 @@ public class CreateOrderRequest {
         this.batchId = batchId;
     }
 
+    // Only used on a first payment (studentId absent) - lets createOrder
+    // reject an already-admitted enquiry BEFORE money changes hands,
+    // instead of only catching it after Razorpay has already charged the
+    // student at verify time.
+    private Integer enquiryId;
+
+    public Integer getEnquiryId() {
+        return enquiryId;
+    }
+
+    public void setEnquiryId(Integer enquiryId) {
+        this.enquiryId = enquiryId;
+    }
+
     public Integer getStudentId() {
         return studentId;
     }

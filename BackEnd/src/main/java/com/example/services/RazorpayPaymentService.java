@@ -134,6 +134,17 @@ public class RazorpayPaymentService {
             throw new IllegalArgumentException("courseId is required");
         }
 
+        // First payment for an enquiry that's already admitted - reject
+        // BEFORE creating a Razorpay order, not after the student has
+        // already been charged. (verifyAndPersist below has its own copy
+        // of this same check as a final safety net, but by then it's too
+        // late to avoid charging someone for nothing.)
+        if (request.getStudentId() == null && request.getEnquiryId() != null
+                && studentRepository.existsByEnquiryEnquiryId(request.getEnquiryId())) {
+            throw new DuplicateAdmissionException(
+                    "Student is already registered for enquiry ID: " + request.getEnquiryId());
+        }
+
         Course course = courseRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found: " + request.getCourseId()));
 
@@ -540,7 +551,7 @@ public class RazorpayPaymentService {
         BigDecimal cumulativePaid = BigDecimal.ZERO;
 
         for (Payment p : payments) {
-            boolean succeeded = "PAID".equals(p.getStatus());
+            boolean succeeded = isSuccess(p.getStatus());
             if (succeeded) {
                 cumulativePaid = cumulativePaid.add(BigDecimal.valueOf(p.getAmount() != null ? p.getAmount() : 0));
             }
@@ -577,13 +588,19 @@ public class RazorpayPaymentService {
     }
 
     private String statusLabel(String rawStatus) {
-        if ("PAID".equals(rawStatus)) return "Success";
+        if (isSuccess(rawStatus)) return "Success";
         if ("FAILED".equals(rawStatus)) return "Failed";
         if ("CREATED".equals(rawStatus)) return "Pending";
-        // Legacy/unexpected rows: treat unset status as a completed offline
-        // payment, since older code paths always meant PAID when they left
-        // status null.
-        return rawStatus != null ? rawStatus : "Success";
+        return rawStatus;
+    }
+
+    // Legacy rows created before the `status` column existed on this table
+    // are left NULL - back then, a row existing at all meant it succeeded
+    // (there was no CREATED/FAILED concept yet). Treat NULL the same as
+    // PAID everywhere a "did this payment actually go through" check is
+    // made, so old payments aren't silently dropped from totals/history.
+    private boolean isSuccess(String status) {
+        return status == null || "PAID".equals(status);
     }
 
     // Username of the currently authenticated staff member (from the JWT),
