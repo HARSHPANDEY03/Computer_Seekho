@@ -87,7 +87,6 @@ export default function EnquiryForm() {
         enquirerMobile: Number(details.mobile),
         enquirerAlternateMobile: details.altMobile ? Number(details.altMobile) : null,
         enquirerEmailId: details.email || null,
-        enquiryDate: enquiry?.enquiryDate || new Date().toISOString().slice(0, 10),
         enquirerQuery: buildQuery(details),
         enquiryProcessedFlag: enquiry?.enquiryProcessedFlag ?? false,
         inquiryCounter: enquiry?.inquiryCounter ?? 0,
@@ -208,8 +207,6 @@ export default function EnquiryForm() {
           <form className="card form-section" onSubmit={onSaveDetails}>
             <h3>Enquiry details</h3>
             <div className="form-grid-3" style={{ marginTop: 14 }}>
-              <div className="field"><label>Enquiry ID</label><input className="input" disabled value={enquiry ? `ENQ-${enquiry.enquiryId}` : 'Auto generated'} /></div>
-              <div className="field"><label>Enquiry date</label><input className="input" disabled value={enquiry?.enquiryDate || 'System date'} /></div>
               <div className="field">
                 <label>Source</label>
                 <select className="select" value={details.source} onChange={(e) => setDetails({ ...details, source: e.target.value })}>

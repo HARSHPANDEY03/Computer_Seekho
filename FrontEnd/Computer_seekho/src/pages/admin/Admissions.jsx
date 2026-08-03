@@ -194,14 +194,15 @@ export default function Admissions() {
     try {
       const [s, h] = await Promise.all([
         getPaymentSummary(studentId),
-        getPaymentsByStudent(studentId).catch(() => []),
+        getPaymentsByStudent(studentId),
       ]);
       setSummary(s);
       setHistory(h);
       setPayment((p) => ({ ...p, amount: s.fullyPaid ? '' : String(s.pendingAmount) }));
-    } catch {
-      // Non-fatal — the payment itself already succeeded (if this was
-      // called after one); the summary panel just won't show.
+    } catch (err) {
+      // Previously swallowed silently, which made failures here
+      // indistinguishable from "no history yet". Surface it instead.
+      setError(`Could not load payment history: ${err.message}`);
     }
   }
 
@@ -272,6 +273,7 @@ export default function Admissions() {
         courseId: Number(form.courseId),
         batchId: Number(form.batchId),
         amount: Number(payment.amount),
+        enquiryId: admittedStudentId ? null : (form.enquiryId || null),
       });
 
       const rzp = new window.Razorpay({
@@ -376,8 +378,21 @@ export default function Admissions() {
             <div className="search-results">
               {results.map((e) => {
                 const status = deriveEnquiryStatus(e);
+                const alreadyAdmitted = status === 'registered';
                 return (
-                  <button className="search-result-row" key={e.enquiryId} onClick={() => { selectEnquiry(e); setSearch(''); }}>
+                  <button
+                    className="search-result-row"
+                    key={e.enquiryId}
+                    style={alreadyAdmitted ? { opacity: 0.55, cursor: 'not-allowed' } : undefined}
+                    onClick={() => {
+                      if (alreadyAdmitted) {
+                        setError('This enquiry is already admitted. Use "Manage Student" to look up their record and collect further payments.');
+                        return;
+                      }
+                      selectEnquiry(e);
+                      setSearch('');
+                    }}
+                  >
                     <div><b>{e.enquirerName}</b><span className="muted mono" style={{ marginLeft: 8 }}>{e.enquirerMobile}</span></div>
                     <StatusBadge status={status}>{STATUS_COPY[status]}</StatusBadge>
                   </button>
@@ -450,11 +465,68 @@ export default function Admissions() {
             <h3>Student registration</h3>
             <div className="admission-grid">
               <div className="field">
-                <label>Photo URL</label>
+                <label>Photo</label>
                 <div className="photo-upload">
-                  {form.photoUrl ? <img src={form.photoUrl} alt="" /> : <span className="muted">No photo URL set</span>}
+                  {form.photoUrl ? <img src={form.photoUrl} alt="" /> : <span className="muted">No photo set</span>}
                 </div>
-                <input className="input" style={{ marginTop: 8 }} placeholder="https://…" value={form.photoUrl} onChange={(e) => setForm({ ...form, photoUrl: e.target.value })} disabled={Boolean(admittedStudentId)} />
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    disabled={Boolean(admittedStudentId)}
+                    onClick={() => document.getElementById('photo-file-input').click()}
+                  >
+                    Browse…
+                  </button>
+                  {form.photoUrl && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      disabled={Boolean(admittedStudentId)}
+                      onClick={() => setForm({ ...form, photoUrl: '' })}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <input
+                  id="photo-file-input"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  disabled={Boolean(admittedStudentId)}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = ''; // allow picking the same file again later
+                    if (!file) return;
+                    if (!file.type.startsWith('image/')) {
+                      setError('Please choose an image file.');
+                      return;
+                    }
+                    if (file.size > 2 * 1024 * 1024) {
+                      setError('Image is too large — please choose one under 2 MB.');
+                      return;
+                    }
+                    setError('');
+                    const reader = new FileReader();
+                    reader.onload = () => setForm((f) => ({ ...f, photoUrl: reader.result }));
+                    reader.onerror = () => setError('Could not read that image file. Please try another.');
+                    reader.readAsDataURL(file);
+                  }}
+                />
+                <input
+                  className="input"
+                  style={{ marginTop: 8 }}
+                  placeholder="…or paste an image URL"
+                  value={form.photoUrl?.startsWith('data:') ? '' : form.photoUrl}
+                  onChange={(e) => setForm({ ...form, photoUrl: e.target.value })}
+                  disabled={Boolean(admittedStudentId)}
+                />
+                {form.photoUrl?.startsWith('data:') && (
+                  <span className="muted" style={{ fontSize: 'var(--text-xs)', display: 'block', marginTop: 4 }}>
+                    Using browsed image — clear it above to paste a URL instead.
+                  </span>
+                )}
               </div>
               <div className="two-col" style={{ gridColumn: 'span 2' }}>
                 <div className="field"><label>Student name *</label><input className="input" value={form.studentName} onChange={(e) => setForm({ ...form, studentName: e.target.value })} disabled={Boolean(admittedStudentId)} /></div>
@@ -505,14 +577,14 @@ export default function Admissions() {
                 </select>
               </div>
               <div className="field"><label>Payment date</label><input type="date" className="input" value={payment.date} onChange={(e) => setPayment({ ...payment, date: e.target.value })} disabled={fullyPaid} /></div>
-              <div className="field">
-                <label>Amount to pay now (INR)</label>
-                <input className="input" value={payment.amount} onChange={(e) => setPayment({ ...payment, amount: e.target.value.replace(/\D/g, '') })} disabled={fullyPaid} />
-              </div>
               {!isOnline && (
                 <div className="field"><label>Transaction / Cheque / DD reference</label><input className="input" value={payment.reference} onChange={(e) => setPayment({ ...payment, reference: e.target.value })} disabled={fullyPaid} /></div>
               )}
               <div className="field"><label>Enquiry reference</label><input className="input" disabled value={form.enquiryId ? `ENQ-${form.enquiryId}` : '—'} /></div>
+              <div className="field" style={{ maxWidth: 260 }}>
+                <label>Amount to pay now (INR)</label>
+                <input className="input" style={{ fontSize: 'var(--text-lg)', fontWeight: 600 }} value={payment.amount} onChange={(e) => setPayment({ ...payment, amount: e.target.value.replace(/\D/g, '') })} disabled={fullyPaid} />
+              </div>
               <div className="field"><label>Remarks (optional)</label><input className="input" placeholder="e.g. partial payment, balance due next week" value={payment.remarks} onChange={(e) => setPayment({ ...payment, remarks: e.target.value })} disabled={fullyPaid} /></div>
             </div>
             {isOnline && !fullyPaid && (
@@ -537,7 +609,7 @@ export default function Admissions() {
           </div>
         </div>
 
-        <div className="card receipt-preview">
+        <div className="card receipt-preview" style={{ minWidth: 0 }}>
           <div className="panel-head">
             <h3>History</h3>
             <span className="badge badge-plain">{fullyPaid ? 'Fully paid' : admittedStudentId ? 'Active' : 'No student selected'}</span>
@@ -550,50 +622,50 @@ export default function Admissions() {
           )}
 
           {summary && (
-            <div className="stat-row">
-              <div className="stat-tile"><b>₹{Number(summary.courseFee).toLocaleString('en-IN')}</b><span>Total course fee</span></div>
-              <div className="stat-tile"><b style={{ color: 'var(--ok-600)' }}>₹{Number(summary.totalPaid).toLocaleString('en-IN')}</b><span>Total paid</span></div>
-              <div className="stat-tile">
-                <b style={{ color: summary.fullyPaid ? 'var(--ok-600)' : 'var(--danger-600)' }}>₹{Number(summary.pendingAmount).toLocaleString('en-IN')}</b>
+            <div className="stat-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12 }}>
+              <div className="stat-tile" style={{ minWidth: 0 }}><b style={{ fontSize: 20, whiteSpace: 'nowrap' }}>₹{Number(summary.courseFee).toLocaleString('en-IN')}</b><span>Total course fee</span></div>
+              <div className="stat-tile" style={{ minWidth: 0 }}><b style={{ color: 'var(--ok-600)', fontSize: 20, whiteSpace: 'nowrap' }}>₹{Number(summary.totalPaid).toLocaleString('en-IN')}</b><span>Total paid</span></div>
+              <div className="stat-tile" style={{ minWidth: 0 }}>
+                <b style={{ color: summary.fullyPaid ? 'var(--ok-600)' : 'var(--danger-600)', fontSize: 20, whiteSpace: 'nowrap' }}>₹{Number(summary.pendingAmount).toLocaleString('en-IN')}</b>
                 <span>{summary.fullyPaid ? 'Fully paid' : 'Remaining fee'}</span>
               </div>
             </div>
           )}
 
           {history && history.length > 0 && (
-            <div className="table-wrap" style={{ marginTop: 16 }}>
+            <div className="table-wrap" style={{ marginTop: 16, overflowX: 'auto' }}>
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Receipt No</th>
-                    <th>Date</th>
-                    <th>Paid Fee</th>
-                    <th>Remaining Fee</th>
-                    <th>Mode</th>
-                    <th>Transaction ID</th>
-                    <th>Status</th>
-                    <th>Collected By</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Receipt No</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Date</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Paid Fee</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Remaining Fee</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Mode</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Transaction ID</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Status</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Collected By</th>
                     <th>Remarks</th>
-                    <th>Action</th>
+                    <th style={{ whiteSpace: 'nowrap' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {history.map((p) => (
                     <tr key={p.paymentId}>
-                      <td>{p.receiptId ? `RCPT-${p.receiptId}` : '—'}</td>
-                      <td>{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</td>
-                      <td>₹{Number(p.amountPaid || 0).toLocaleString('en-IN')}</td>
-                      <td>₹{Number(p.remainingFeeAfter || 0).toLocaleString('en-IN')}</td>
-                      <td>{p.paymentMode || '—'}</td>
-                      <td className="mono" style={{ fontSize: 'var(--text-xs)' }}>{p.transactionId || '—'}</td>
-                      <td>
+                      <td style={{ whiteSpace: 'nowrap' }}>{p.receiptId ? `RCPT-${p.receiptId}` : '—'}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>₹{Number(p.amountPaid || 0).toLocaleString('en-IN')}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>₹{Number(p.remainingFeeAfter || 0).toLocaleString('en-IN')}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>{p.paymentMode || '—'}</td>
+                      <td className="mono" style={{ fontSize: 'var(--text-xs)', whiteSpace: 'nowrap' }}>{p.transactionId || '—'}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
                         <span className={`badge ${p.status === 'Success' ? 'badge-ok' : p.status === 'Failed' ? 'badge-danger' : 'badge-plain'}`}>
                           {p.status}
                         </span>
                       </td>
-                      <td>{p.collectedBy || '—'}</td>
+                      <td style={{ whiteSpace: 'nowrap' }}>{p.collectedBy || '—'}</td>
                       <td style={{ maxWidth: 160, whiteSpace: 'normal' }}>{p.remarks || '—'}</td>
-                      <td>
+                      <td style={{ whiteSpace: 'nowrap' }}>
                         {p.receiptId ? (
                           <Link to={`/admin/receipt/${p.receiptId}`} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm">
                             View / Print
