@@ -14,7 +14,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
-import com.example.repositories.BatchRepository;
 
 import com.example.dto.ExcelImportResponse;
 import com.example.dto.ExcelValidationResponse;
@@ -140,6 +139,7 @@ public class ExcelUploadServiceImpl implements ExcelUploadService {
         int total = 0;
         int imported = 0;
         int failed = 0;
+        java.util.List<String> rowErrors = new java.util.ArrayList<>();
 
         try (Workbook workbook =
                      new XSSFWorkbook(file.getInputStream())) {
@@ -181,14 +181,14 @@ public class ExcelUploadServiceImpl implements ExcelUploadService {
                                     Integer.parseInt(recruiterId))
                                     .orElseThrow(() ->
                                             new RuntimeException(
-                                                    "Recruiter not found"));
+                                                    "Recruiter not found: " + recruiterId));
 
                     Batch batch =
                             batchRepository.findById(
                                     Integer.parseInt(batchId))
                                     .orElseThrow(() ->
                                             new RuntimeException(
-                                                    "Batch not found"));
+                                                    "Batch not found: " + batchId));
 
                     PlacedStudent placedStudent =
                             new PlacedStudent();
@@ -210,6 +210,7 @@ public class ExcelUploadServiceImpl implements ExcelUploadService {
                 } catch (Exception e) {
 
                     failed++;
+                    rowErrors.add("Row " + (row.getRowNum() + 1) + ": " + e.getMessage());
                 }
 
             }
@@ -234,6 +235,7 @@ public class ExcelUploadServiceImpl implements ExcelUploadService {
             response.setTotalRecords(total);
             response.setImportedRecords(imported);
             response.setFailedRecords(failed);
+            response.setErrors(rowErrors);
 
             return response;
 
@@ -244,11 +246,8 @@ public class ExcelUploadServiceImpl implements ExcelUploadService {
         }
     }
 
-    // ---- Recruiters bulk import ----
-    // Columns: Recruiter Name (required) | Description (optional) | Photo URL (optional)
-    // Only the name is mandatory - unlike placements, nothing here is a
-    // foreign key into another table, so there's much less that can fail
-    // per row.
+    // ==================== Recruiters ====================
+    // Columns: 0 = Recruiter Name (required), 1 = Description (optional), 2 = Photo URL (optional)
 
     @Override
     public ExcelValidationResponse validateRecruiterExcel(MultipartFile file) {
@@ -256,14 +255,18 @@ public class ExcelUploadServiceImpl implements ExcelUploadService {
         ExcelValidationResponse response = new ExcelValidationResponse();
 
         if (file == null || file.isEmpty()) {
+
             response.setSuccess(false);
             response.getErrors().add("Excel file is empty.");
+
             return response;
         }
 
         if (!file.getOriginalFilename().endsWith(".xlsx")) {
+
             response.setSuccess(false);
             response.getErrors().add("Only .xlsx file is allowed.");
+
             return response;
         }
 
@@ -277,16 +280,18 @@ public class ExcelUploadServiceImpl implements ExcelUploadService {
             Iterator<Row> rows = sheet.iterator();
 
             if (rows.hasNext()) {
-                rows.next(); // header row
+                rows.next();
             }
 
             while (rows.hasNext()) {
+
                 Row row = rows.next();
                 total++;
 
-                Cell nameCell = row.getCell(0);
+                String name = formatter.formatCellValue(row.getCell(0));
 
-                if (nameCell == null || formatter.formatCellValue(nameCell).isBlank()) {
+                if (name == null || name.isBlank()) {
+
                     invalid++;
                     response.getErrors().add(
                             "Row " + (row.getRowNum() + 1) + " is missing the recruiter name.");
@@ -302,7 +307,9 @@ public class ExcelUploadServiceImpl implements ExcelUploadService {
             response.setInvalidRecords(invalid);
 
         } catch (IOException e) {
-            throw new ExcelImportException("Unable to validate excel file.");
+
+            throw new ExcelImportException(
+                    "Unable to validate excel file.");
         }
 
         return response;
@@ -314,16 +321,20 @@ public class ExcelUploadServiceImpl implements ExcelUploadService {
         ExcelValidationResponse validation = validateRecruiterExcel(file);
 
         if (!validation.isSuccess()) {
+
             ExcelImportResponse response = new ExcelImportResponse();
+
             response.setSuccess(false);
             response.setMessage("Excel validation failed.");
             response.setTotalRecords(validation.getTotalRecords());
+
             return response;
         }
 
         int total = 0;
         int imported = 0;
         int failed = 0;
+        java.util.List<String> rowErrors = new java.util.ArrayList<>();
 
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
 
@@ -331,10 +342,11 @@ public class ExcelUploadServiceImpl implements ExcelUploadService {
             Iterator<Row> rows = sheet.iterator();
 
             if (rows.hasNext()) {
-                rows.next(); // header row
+                rows.next();
             }
 
             while (rows.hasNext()) {
+
                 Row row = rows.next();
                 total++;
 
@@ -343,36 +355,42 @@ public class ExcelUploadServiceImpl implements ExcelUploadService {
                 String photoUrl = formatter.formatCellValue(row.getCell(2));
 
                 try {
-                    if (name.isBlank()) {
+
+                    if (name == null || name.isBlank()) {
                         throw new RuntimeException("Recruiter name is required");
                     }
 
                     Recruiter recruiter = new Recruiter();
                     recruiter.setRecruiterName(name);
-                    recruiter.setDescription(description.isBlank() ? null : description);
-                    recruiter.setPhotoUrl(photoUrl.isBlank() ? null : photoUrl);
+                    recruiter.setDescription((description == null || description.isBlank()) ? null : description);
+                    recruiter.setPhotoUrl((photoUrl == null || photoUrl.isBlank()) ? null : photoUrl);
 
                     recruiterRepository.save(recruiter);
+
                     imported++;
 
                 } catch (Exception e) {
+
                     failed++;
+                    rowErrors.add("Row " + (row.getRowNum() + 1) + ": " + e.getMessage());
                 }
             }
 
             ExcelImportResponse response = new ExcelImportResponse();
+
             response.setSuccess(failed == 0);
-            response.setMessage(failed == 0
-                    ? "Excel imported successfully."
-                    : "Excel imported with some failed records.");
+            response.setMessage(failed == 0 ? "Excel imported successfully." : "Excel imported with some failed records.");
             response.setTotalRecords(total);
             response.setImportedRecords(imported);
             response.setFailedRecords(failed);
+            response.setErrors(rowErrors);
 
             return response;
 
         } catch (IOException e) {
-            throw new ExcelImportException("Unable to import Excel file.");
+
+            throw new ExcelImportException(
+                    "Unable to import Excel file.");
         }
     }
 

@@ -110,6 +110,23 @@ public class SecurityConfig {
                     ).authenticated()
 
                     /*
+                     * Anyone can check basic application
+                     * health and information.
+                     */
+                    .requestMatchers(
+                            "/actuator/health",
+                            "/actuator/health/**",
+                            "/actuator/info"
+                    ).permitAll()
+
+                    /*
+                     * Other actuator endpoints require JWT.
+                     */
+                    .requestMatchers(
+                            "/actuator/**"
+                    ).authenticated()
+
+                    /*
                      * All remaining endpoints require JWT.
                      */
                     .anyRequest()

@@ -38,6 +38,7 @@ public class ExcelUploadController {
     public ResponseEntity<ExcelValidationResponse>
     validateRecruiterExcel(
             @RequestParam("file") MultipartFile file) {
+
         return ResponseEntity.ok(
                 excelUploadService.validateRecruiterExcel(file));
     }
@@ -48,7 +49,9 @@ public class ExcelUploadController {
     public ResponseEntity<ExcelImportResponse>
     uploadRecruiterExcel(
             @RequestParam("file") MultipartFile file) {
+
         return ResponseEntity.ok(
                 excelUploadService.uploadRecruiterExcel(file));
     }
+
 }
