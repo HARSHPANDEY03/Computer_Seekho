@@ -222,7 +222,7 @@ function Footer() {
             <li>5th Floor, Vidyanidhi Education Complex</li>
             <li>Vidyanidhi Marg, JVPD Scheme, Juhu</li>
             <li>Mumbai – 400 049</li>
-            <li>training.vita@gmail.com</li>
+            <li>computerseekho10@gmail.com</li>
           </ul>
         </div>
         <div>
