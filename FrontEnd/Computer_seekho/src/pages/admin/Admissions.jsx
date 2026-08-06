@@ -47,7 +47,6 @@ export default function Admissions() {
 
   const [form, setForm] = useState(blankForm());
   const [payment, setPayment] = useState({ type: 'Cash', date: new Date().toISOString().slice(0, 10), amount: '', reference: '', remarks: '' });
-  const [printMode, setPrintMode] = useState(null);
   const [result, setResult] = useState(null);
   // Live course-fee / paid / pending balance for the admitted student, plus
   // the full itemized payment history. null until either the first payment
@@ -335,9 +334,295 @@ export default function Admissions() {
     }
   }
 
-  function doPrint(mode) {
-    setPrintMode(mode);
-    setTimeout(() => { window.print(); setPrintMode(null); }, 60);
+  function printFeeReceipt() {
+    const row = (label, value) => `
+      <tr><td class="lbl">${label}</td><td class="val">${value ?? '—'}</td></tr>
+    `;
+
+    const paymentMode = payment.type;
+
+    const summaryHtml = summary ? `
+      <div class="section-title">Balance Summary</div>
+      <table class="stats">
+        <tr>
+          <td><div class="stat-label">Total Course Fee</div><div class="stat-value">₹${Number(summary.courseFee).toLocaleString('en-IN')}</div></td>
+          <td><div class="stat-label">Total Paid to Date</div><div class="stat-value ok">₹${Number(summary.totalPaid).toLocaleString('en-IN')}</div></td>
+          <td><div class="stat-label">${summary.fullyPaid ? 'Status' : 'Balance Pending'}</div><div class="stat-value ${summary.fullyPaid ? 'ok' : 'danger'}">${summary.fullyPaid ? 'Fully Paid' : `₹${Number(summary.pendingAmount).toLocaleString('en-IN')}`}</div></td>
+        </tr>
+      </table>
+    ` : '';
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Receipt ${result?.receiptId ? `RCPT-${result.receiptId}` : ''}</title>
+<style>
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; color: #1f2937; margin: 0; padding: 14px; background: #f3f4f6; font-size: 12px; line-height: 1.35; }
+  .paper { max-width: 720px; margin: 0 auto; background: #fff; border: 1px solid #d1d5db; border-radius: 6px; overflow: hidden; }
+  .band { background: #0d9488; color: #fff; padding: 14px 28px; text-align: center; }
+  .band h1 { margin: 0; font-size: 18px; font-weight: 700; }
+  .band p { margin: 2px 0 0; font-size: 11px; color: #e0f2f1; }
+  .title-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 28px; border-bottom: 2px solid #0d9488; background: #f0fdfa; }
+  .title-row .tag { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: #0d9488; text-transform: uppercase; }
+  .title-row .num { font-size: 15px; font-weight: 700; margin-top: 1px; }
+  .title-row .date-block { text-align: right; }
+  .title-row .lbl-sm { font-size: 10px; color: #6b7280; }
+  .title-row .val-sm { font-size: 13px; font-weight: 600; }
+  .content { padding: 4px 28px 16px; }
+  .section-title { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: #0d9488; margin: 12px 0 4px; padding-bottom: 3px; border-bottom: 1px solid #e5e7eb; }
+  .info-table { width: 100%; border-collapse: collapse; }
+  .info-table tr { border-bottom: 1px solid #f1f2f4; }
+  .info-table tr:last-child { border-bottom: none; }
+  .info-table td { padding: 3.5px 0; vertical-align: top; }
+  .info-table td.lbl { width: 42%; color: #6b7280; }
+  .info-table td.val { font-weight: 600; color: #111827; }
+  .amount-box { display: flex; justify-content: space-between; align-items: center; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 6px; padding: 9px 16px; margin-top: 8px; }
+  .amount-box .amt-label { font-size: 11px; color: #0f766e; font-weight: 600; }
+  .amount-box .amt-value { font-size: 18px; font-weight: 800; color: #0d9488; }
+  .stats { width: 100%; border-collapse: separate; border-spacing: 8px 0; margin-top: 2px; }
+  .stats td { border: 1px solid #e5e7eb; border-radius: 6px; padding: 7px; text-align: center; width: 33.33%; }
+  .stat-label { font-size: 10px; color: #6b7280; margin-bottom: 2px; }
+  .stat-value { font-size: 14px; font-weight: 700; }
+  .ok { color: #0d9488; }
+  .danger { color: #dc2626; }
+  .foot { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 16px; padding-top: 8px; border-top: 1px solid #e5e7eb; }
+  .foot .note { font-size: 10px; color: #9ca3af; }
+  .sig { text-align: center; }
+  .sig .line { border-top: 1px solid #9ca3af; padding-top: 3px; margin-top: 22px; font-size: 10px; color: #6b7280; min-width: 150px; }
+  @media print { body { background: #fff; padding: 0; } .paper { border: none; border-radius: 0; max-width: 100%; } }
+  @page { size: A4; margin: 10mm; }
+</style>
+</head>
+<body>
+  <div class="paper">
+    <div class="band">
+      <h1>Computer Seekho</h1>
+      <p>USM's Vidyanidhi Info Tech Academy</p>
+      <p>5th Floor, Vidyanidhi Education Complex, JVPD Scheme, Juhu, Mumbai 400049</p>
+      <p>8368772333 / 87422262553 &middot; computerseekho10@gmail.com</p>
+    </div>
+
+    <div class="title-row">
+      <div>
+        <div class="tag">Fee Receipt</div>
+        <div class="num">${result?.receiptId ? `RCPT-${result.receiptId}` : 'Draft'}</div>
+      </div>
+      <div class="date-block">
+        <div class="lbl-sm">Date</div>
+        <div class="val-sm">${new Date(payment.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="section-title">Student Details</div>
+      <table class="info-table">
+        ${row('Name', form.studentName)}
+        ${row('Mobile', form.studentMobile)}
+        ${row('Email', form.studentEmail)}
+      </table>
+
+      <div class="section-title">Course Details</div>
+      <table class="info-table">
+        ${row('Course', selectedCourse?.courseName)}
+        ${row('Batch', selectedBatch?.batchName)}
+      </table>
+
+      <div class="section-title">This Payment</div>
+      <table class="info-table">
+        ${row('Payment Mode', paymentMode)}
+        ${result?.razorpayPaymentId ? row('Transaction ID', result.razorpayPaymentId) : ''}
+      </table>
+      <div class="amount-box">
+        <span class="amt-label">AMOUNT PAID</span>
+        <span class="amt-value">₹${Number(result?.receiptAmount ?? payment.amount ?? 0).toLocaleString('en-IN')}</span>
+      </div>
+
+      ${summaryHtml}
+
+      <div class="foot">
+        <p class="note">This is a system-generated receipt.</p>
+        <div class="sig"><div class="line">Authorized Signature</div></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const printWindow = window.open('', '_blank', 'width=850,height=1000');
+    if (!printWindow) {
+      setError('Your browser blocked the print window. Please allow pop-ups for this site and try again.');
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.onload = () => {
+      printWindow.print();
+    };
+  }
+
+  function printEnrollmentForm() {
+    const row = (label, value) => `
+      <div class="cell"><span class="lbl">${label}</span><b>${value ?? '—'}</b></div>
+    `;
+
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Enrollment Form - ${form.studentName || 'Student'}</title>
+<style>
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+    color: #1f2937;
+    margin: 0;
+    padding: 14px;
+    background: #f3f4f6;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .paper {
+    max-width: 720px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .band {
+    background: #0d9488;
+    color: #fff;
+    padding: 18px 28px;
+    text-align: center;
+  }
+  .band h1 { margin: 0; font-size: 19px; font-weight: 700; }
+  .band p { margin: 3px 0 0; font-size: 11px; color: #e0f2f1; }
+  .title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 28px;
+    border-bottom: 2px solid #0d9488;
+    background: #f0fdfa;
+  }
+  .title-row .tag { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: #0d9488; text-transform: uppercase; }
+  .title-row .num { font-size: 15px; font-weight: 700; margin-top: 1px; }
+  .content { padding: 20px 28px 24px; display: flex; gap: 24px; }
+  .photo-box {
+    width: 110px;
+    height: 130px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9fafb;
+    color: #9ca3af;
+    font-size: 10px;
+    text-align: center;
+  }
+  .photo-box img { width: 100%; height: 100%; object-fit: cover; }
+  .fields { flex: 1; }
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #0d9488;
+    margin: 16px 28px 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; padding: 0 28px; }
+  .cell .lbl { display: block; color: #6b7280; font-size: 10px; margin-bottom: 1px; }
+  .cell b { font-size: 12.5px; color: #111827; }
+  .full { grid-column: span 2; }
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin: 28px 28px 20px;
+    padding-top: 14px;
+    border-top: 1px solid #e5e7eb;
+  }
+  .foot .note { font-size: 10px; color: #9ca3af; }
+  .sig { text-align: center; }
+  .sig .line { border-top: 1px solid #9ca3af; padding-top: 4px; margin-top: 34px; font-size: 10px; color: #6b7280; min-width: 150px; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .paper { border: none; border-radius: 0; max-width: 100%; }
+  }
+  @page { size: A4; margin: 12mm; }
+</style>
+</head>
+<body>
+  <div class="paper">
+    <div class="band">
+      <h1>Computer Seekho</h1>
+      <p>USM's Vidyanidhi Info Tech Academy</p>
+      <p>5th Floor, Vidyanidhi Education Complex, JVPD Scheme, Juhu, Mumbai 400049</p>
+      <p>8368772333 / 87422262553 &middot; computerseekho10@gmail.com</p>
+    </div>
+
+    <div class="title-row">
+      <div>
+        <div class="tag">Enrollment Form</div>
+        <div class="num">${form.studentName || 'New Applicant'}</div>
+      </div>
+      <div class="tag" style="text-align:right">${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+    </div>
+
+    <div class="content">
+      <div class="photo-box">
+        ${form.photoUrl ? `<img src="${form.photoUrl}" alt="" />` : 'No photo'}
+      </div>
+      <div class="fields" style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px 20px;">
+        ${row('Mobile', form.studentMobile)}
+        ${row('Email', form.studentEmail)}
+        ${row('Date of Birth', form.studentDob)}
+        ${row('Gender', form.studentGender)}
+      </div>
+    </div>
+
+    <div class="section-title">Background</div>
+    <div class="grid">
+      ${row('Qualification', form.studentQualification)}
+      <div class="cell full">${row('Address', form.studentAddress)}</div>
+    </div>
+
+    <div class="section-title">Course Details</div>
+    <div class="grid">
+      ${row('Course', selectedCourse?.courseName)}
+      ${row('Batch', selectedBatch?.batchName)}
+      ${row('Full Course Fee', form.courseFee ? `₹${Number(form.courseFee).toLocaleString('en-IN')}` : null)}
+    </div>
+
+    <div class="foot">
+      <p class="note">This is a system-generated enrollment form.</p>
+      <div class="sig"><div class="line">Authorized Signature</div></div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const printWindow = window.open('', '_blank', 'width=850,height=1000');
+    if (!printWindow) {
+      setError('Your browser blocked the print window. Please allow pop-ups for this site and try again.');
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.onload = () => {
+      printWindow.print();
+    };
   }
 
   function startOver() {
@@ -558,7 +843,7 @@ export default function Admissions() {
                   {batches.map((b) => <option key={b.batchId} value={b.batchId}>{b.batchName}</option>)}
                 </select>
               </div>
-              <div className="field"><label>Full course fee (INR)</label><input className="input" value={form.courseFee} onChange={(e) => setForm({ ...form, courseFee: e.target.value })} disabled={Boolean(admittedStudentId)} /></div>
+              <div className="field"><label>Full course fee (INR)</label><input className="input" value={form.courseFee} disabled title="Set automatically from the selected course/batch" /></div>
             </div>
           </div>
 
@@ -594,8 +879,8 @@ export default function Admissions() {
               </p>
             )}
             <div className="form-actions">
-              <button className="btn btn-outline" type="button" onClick={() => doPrint('form')}>Print Form</button>
-              <button className="btn btn-outline" type="button" onClick={() => doPrint('receipt')} disabled={!result}>Print Receipt</button>
+              <button className="btn btn-outline" type="button" onClick={printEnrollmentForm}>Print Form</button>
+              <button className="btn btn-outline" type="button" onClick={printFeeReceipt} disabled={!result}>Print Receipt</button>
               {isOnline ? (
                 <button className="btn btn-primary" type="button" onClick={onPayOnline} disabled={saving || fullyPaid}>
                   {saving ? <span className="spinner" /> : fullyPaid ? 'Fully paid' : admittedStudentId ? 'Pay next installment' : 'Pay & Admit via Razorpay'}
@@ -694,37 +979,6 @@ export default function Admissions() {
           )}
         </div>
       </div>
-
-      {printMode && (
-        <div className="print-area">
-          {printMode === 'form' ? (
-            <div>
-              <h2>USM's Vidyanidhi Info Tech Academy — Enrollment Form</h2>
-              <p>Name: {form.studentName}</p>
-              <p>Mobile: {form.studentMobile}</p>
-              <p>Email: {form.studentEmail || '—'}</p>
-              <p>Date of birth: {form.studentDob || '—'}</p>
-              <p>Gender: {form.studentGender || '—'}</p>
-              <p>Address: {form.studentAddress || '—'}</p>
-              <p>Qualification: {form.studentQualification || '—'}</p>
-              <p>Course: {selectedCourse?.courseName || '—'}</p>
-              <p>Batch: {selectedBatch?.batchName || '—'}</p>
-              <p>Full course fee: {form.courseFee ? `₹${form.courseFee}` : '—'}</p>
-            </div>
-          ) : (
-            <div>
-              <h2>Computer Seekho — Fee Receipt</h2>
-              {result?.receiptId && <p>Receipt No.: RCPT-{result.receiptId}</p>}
-              <p>Student: {form.studentName}</p>
-              <p>Course / Batch: {selectedCourse?.courseName} / {selectedBatch?.batchName}</p>
-              <p>Payment type: {payment.type}</p>
-              <p>This payment: ₹{payment.amount}</p>
-              <p>Date: {payment.date}</p>
-              {summary && <p>Remaining fee: ₹{summary.pendingAmount}</p>}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

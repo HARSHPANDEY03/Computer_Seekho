@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import ResourceTab from '../../components/admin/ResourceTab';
-import { BackendGapNotice, Loading } from '../../components/ui/ui';
+import { Loading } from '../../components/ui/ui';
 import * as coursesApi from '../../api/courses';
 import * as staffApi from '../../api/staff';
 import * as contentApi from '../../api/content';
@@ -8,7 +8,7 @@ import * as enquiriesApi from '../../api/enquiries';
 import * as studentsApi from '../../api/students';
 import * as miscApi from '../../api/misc';
 
-const TABS = ['Courses', 'Batches', 'Staff', 'Students', 'Recruiters', 'Placements', 'Albums', 'Images', 'Announcements', 'Payment Types', 'Closure Reasons'];
+const TABS = ['Courses', 'Batches', 'Staff', 'Students', 'Recruiters', 'Placements', 'Albums', 'Images', 'Announcements', 'Contact Messages', 'Closure Reasons'];
 
 export default function Content() {
   const [tab, setTab] = useState('Courses');
@@ -16,15 +16,17 @@ export default function Content() {
   const [batches, setBatches] = useState(null);
   const [recruiters, setRecruiters] = useState(null);
   const [albums, setAlbums] = useState(null);
+  const [roles, setRoles] = useState(null);
 
   useEffect(() => {
     coursesApi.getAllCourses().then(setCourses).catch(() => setCourses([]));
     coursesApi.getAllBatches().then(setBatches).catch(() => setBatches([]));
     contentApi.getAllRecruiters().then(setRecruiters).catch(() => setRecruiters([]));
     contentApi.getAllAlbums().then(setAlbums).catch(() => setAlbums([]));
+    staffApi.getAllRoles().then(setRoles).catch(() => setRoles([]));
   }, []);
 
-  if (courses === null || batches === null || recruiters === null || albums === null) return <Loading label="Loading content manager…" />;
+  if (courses === null || batches === null || recruiters === null || albums === null || roles === null) return <Loading label="Loading content manager…" />;
 
   return (
     <div>
@@ -43,19 +45,14 @@ export default function Content() {
 
       {tab === 'Courses' && <ResourceTab config={coursesConfig()} />}
       {tab === 'Batches' && <ResourceTab config={batchesConfig(courses)} />}
-      {tab === 'Staff' && <ResourceTab config={staffConfig()} />}
+      {tab === 'Staff' && <ResourceTab config={staffConfig(roles)} />}
       {tab === 'Students' && <ResourceTab config={studentsConfig(courses, batches)} />}
       {tab === 'Recruiters' && <ResourceTab config={recruitersConfig()} />}
       {tab === 'Placements' && <ResourceTab config={placementsConfig(batches, recruiters)} />}
       {tab === 'Albums' && <ResourceTab config={albumsConfig()} />}
       {tab === 'Images' && <ResourceTab config={imagesConfig(albums)} />}
       {tab === 'Announcements' && <ResourceTab config={announcementsConfig()} />}
-      {tab === 'Payment Types' && (
-        <BackendGapNotice>
-          <code>PaymentTypeController.java</code> exists but has no endpoints implemented — there's nowhere for this
-          tab to read from or save to yet. The table and form here are ready as soon as the controller is built out.
-        </BackendGapNotice>
-      )}
+      {tab === 'Contact Messages' && <ResourceTab config={contactMessagesConfig()} />}
       {tab === 'Closure Reasons' && <ResourceTab config={closureReasonsConfig()} />}
     </div>
   );
@@ -128,7 +125,8 @@ function batchesConfig(courses) {
   };
 }
 
-function staffConfig() {
+function staffConfig(roles) {
+  const roleOptions = roles.map((r) => ({ value: r.userId, label: r.roleName }));
   return {
     idKey: 'staffId',
     title: 'Staff',
@@ -142,7 +140,12 @@ function staffConfig() {
     ],
     fields: [
       { key: 'staffName', label: 'Full name', type: 'text', required: true },
-      { key: 'staffRole', label: 'Role / designation', type: 'text' },
+      // The backend derives the displayed role name from userRoleId - it
+      // does not accept a free-text role at all. A plain text field here
+      // was silently ignored, and omitting this dropdown caused
+      // "The given id must not be null" on save, since userRoleId arrived
+      // as null and StaffServiceImpl looks it up via findById(userRoleId).
+      { key: 'userRoleId', label: 'Role', type: 'select', required: true, options: roleOptions },
       { key: 'staffMobile', label: 'Mobile', type: 'text' },
       { key: 'staffEmail', label: 'Email', type: 'text' },
       { key: 'photoUrl', label: 'Photo', type: 'photo' },
@@ -154,9 +157,10 @@ function staffConfig() {
     toForm: (s) => ({ ...s, staffPassword: '' }),
     toPayload: (f) => {
       const { staffPassword, ...rest } = f;
-      return staffPassword ? { ...rest, staffPassword } : rest;
+      const payload = { ...rest, userRoleId: Number(f.userRoleId) };
+      return staffPassword ? { ...payload, staffPassword } : payload;
     },
-    emptyForm: { staffName: '', staffRole: '', staffMobile: '', staffEmail: '', photoUrl: '', description: '', staffUsername: '', staffPassword: '' },
+    emptyForm: { staffName: '', userRoleId: '', staffMobile: '', staffEmail: '', photoUrl: '', description: '', staffUsername: '', staffPassword: '' },
   };
 }
 
@@ -362,6 +366,33 @@ function announcementsConfig() {
     toForm: (a) => ({ ...a }),
     toPayload: (f) => f,
     emptyForm: { title: '', description: '', publishDate: '', expiryDate: '' },
+  };
+}
+
+// Read-only inbox: submitted messages are never edited by staff, only
+// read and deleted once handled - so canCreate/canUpdate are both off.
+// GET /contacts (and DELETE) already require a valid staff JWT under the
+// current SecurityConfig - only POST /contacts (the public submission
+// itself) is in the permitAll allowlist, so this tab is already properly
+// admin-only without any security change needed.
+function contactMessagesConfig() {
+  return {
+    idKey: 'contactId',
+    title: 'Contact Messages',
+    singular: 'Message',
+    searchKeys: ['name', 'email', 'message'],
+    columns: [
+      { key: 'name', label: 'Name' },
+      { key: 'email', label: 'Email' },
+      { key: 'message', label: 'Message', render: (i) => (i.message?.length > 80 ? `${i.message.slice(0, 80)}…` : i.message) },
+    ],
+    fields: [],
+    api: { list: contentApi.getAllContacts, remove: contentApi.deleteContact },
+    canCreate: false,
+    canUpdate: false,
+    toForm: (c) => ({ ...c }),
+    toPayload: (f) => f,
+    emptyForm: {},
   };
 }
 

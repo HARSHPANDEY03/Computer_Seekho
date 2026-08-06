@@ -68,12 +68,12 @@ export default function Contact() {
         <div className="card card-pad contact-method">
           <div className="circle" aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ContactIcon kind="phone" /></div>
           <b>Call us</b>
-          <span>022-2625 5629 / 2670 5498</span>
+          <span>+91 8368772333 /+91 8422062553</span>
         </div>
         <div className="card card-pad contact-method">
           <div className="circle" aria-hidden="true" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}><ContactIcon kind="mail" /></div>
           <b>Email us</b>
-          <span>training.vita@gmail.com</span>
+          <span>computerseekho10@gmail.com</span>
         </div>
       </div>
 

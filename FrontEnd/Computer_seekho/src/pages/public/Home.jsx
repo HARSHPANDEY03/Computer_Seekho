@@ -16,7 +16,7 @@ export default function Home() {
 
   useEffect(() => {
     getActiveCourses().then(setCourses).catch(() => setCourses([]));
-    getAllAnnouncements().then((a) => setAnnouncements((a || []).slice(0, 3))).catch(() => {});
+    getAllAnnouncements().then((a) => setAnnouncements(a || [])).catch(() => {});
 
     Promise.allSettled([getActiveCourses(), getAllRecruiters(), getAllPlacements(), getAllStudents()]).then(
       ([coursesR, recruitersR, placementsR, studentsR]) => {
@@ -24,7 +24,7 @@ export default function Home() {
         const recruiters = recruitersR.status === 'fulfilled' ? recruitersR.value.length : null;
         const placed = placementsR.status === 'fulfilled' ? placementsR.value.length : null;
         const trained = studentsR.status === 'fulfilled' ? studentsR.value.length : null;
-        const placementRate = placed !== null && trained ? Math.round((placed / trained) * 100) : null;
+        const placementRate = placed !== null && trained ? Math.min(100, Math.round((placed / trained) * 100)) : null;
         setStats({ programs, recruiters, placementRate, trained });
       }
     );
