@@ -60,7 +60,7 @@ public class SecurityConfig {
                     // submitting the Contact-Us form is public; viewing/
                     // deleting the submitted messages stays admin-only
                     .requestMatchers(HttpMethod.POST, "/contacts").permitAll()
-                    
+
                     // ---- Public: course & batch browsing (Programs,
                     // ProgramDetail, Home, PayFees pages) ----
                     .requestMatchers(HttpMethod.GET,
@@ -90,8 +90,6 @@ public class SecurityConfig {
                             "/api/payments/verify"
                     ).permitAll()
 
-
-
                     /*
                      * Anyone can check basic application
                      * health and information.
@@ -110,27 +108,17 @@ public class SecurityConfig {
                     ).authenticated()
 
                     /*
-                     * Anyone can check basic application
-                     * health and information.
-                     */
-                    .requestMatchers(
-                            "/actuator/health",
-                            "/actuator/health/**",
-                            "/actuator/info"
-                    ).permitAll()
-
-                    /*
-                     * Other actuator endpoints require JWT.
-                     */
-                    .requestMatchers(
-                            "/actuator/**"
-                    ).authenticated()
-
-                    /*
-                     * All remaining endpoints require JWT.
+                     * Every other endpoint on the whole application -
+                     * registering/editing/deleting students, courses,
+                     * batches, staff, enquiries, excel import, dashboard,
+                     * payments admin views, everything under /admin's
+                     * screens - requires a valid JWT. This is the fix:
+                     * it was previously .permitAll(), which silently
+                     * overrode every rule above it and left the entire
+                     * API open regardless of the allowlist.
                      */
                     .anyRequest()
-                    .permitAll()
+                    .authenticated()
             )
 
             // Register JWT Filter
